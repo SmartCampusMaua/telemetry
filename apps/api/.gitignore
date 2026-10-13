@@ -1,0 +1,67 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env.local
+
+# Infra config (org -> InfluxDB instance registry, mqtt broker credentials — holds live
+# secrets); infra.example.json is the committed, sanitized template. The glob (not just the
+# exact filename) also catches stray backups like infra.json.bak, which would otherwise leak
+# a live token just as easily. influxdb.json* kept ignored too — the now-unused predecessor
+# file, still sitting on disk locally with a real token, not deleted outright.
+infra.json*
+influxdb.json*
+# sensors.json/devices.json/assets.json aren't secret, but they're parse-mqtt-to-influxdb3's data,
+# not this repo's — a local copy at the repo root (for local testing without the sibling checkout)
+# shouldn't get committed here and drift out of sync with the real source of truth.
+sensors.json*
+devices.json*
+assets.json*
+
+# One-time bootstrap tooling for seeding a *fresh* remote Postgres (see scripts/seed.sh's own
+# header comment) — a frozen snapshot of registry data, only meant for that first seed on this
+# machine. Not committed: it would drift out of sync with the real registry the same way a local
+# sensors.json/devices.json/assets.json copy would (see above).
+scripts/seed.sh
+scripts/seed.sql
+
+# personal editor settings — not a project convention to impose on other contributors
+.vscode
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+**/*.trace
+**/*.zip
+**/*.tar.gz
+**/*.tgz
+**/*.log
+package-lock.json
+**/*.bun

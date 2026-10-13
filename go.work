@@ -1,0 +1,9 @@
+go 1.26.5
+
+use (
+	./packages/go-config
+	./packages/go-data
+	./packages/go-parse
+	./services/bridge/chirpstackv4
+	./services/input/mqtt
+)
