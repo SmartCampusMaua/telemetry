@@ -5,3 +5,7 @@ sensors.json
 device_channels.json
 infra.json
 infra.docker.json
+
+# pnpm/turbo workspace
+node_modules
+.turbo

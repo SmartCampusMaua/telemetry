@@ -1,12 +1,67 @@
-name: parse-mqtt-to-influxdb3-workflow
+name: ci
+
 on:
   push:
     branches:
       - develop
+
 jobs:
-  check-application:
-    name: build-job
+  # Computes which of the three buildable images actually need rebuilding —
+  # a push touching only services/input/mqtt shouldn't also rebuild api or
+  # chirpstackv4. packages/go-config affects both Go services (they both
+  # import it); packages/go-data and packages/go-parse affect mqtt only
+  # (chirpstackv4 imports neither — see its go.mod).
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
+            mqtt:
+              - 'packages/go-config/**'
+              - 'packages/go-data/**'
+              - 'packages/go-parse/**'
+              - 'services/input/mqtt/**'
+              - 'go.work'
+              - 'go.work.sum'
+            chirpstackv4:
+              - 'packages/go-config/**'
+              - 'services/bridge/chirpstackv4/**'
+              - 'go.work'
+              - 'go.work.sum'
+
+      - name: Build matrix of changed services
+        id: set-matrix
+        run: |
+          matrix='[]'
+          add() {
+            matrix=$(jq -c --arg name "$1" --arg context "$2" --arg dockerfile "$3" --arg image "$4" \
+              '. + [{"name":$name,"context":$context,"dockerfile":$dockerfile,"image":$image}]' <<< "$matrix")
+          }
+          [ "${{ steps.filter.outputs.api }}" = "true" ] && add api apps/api apps/api/Dockerfile telemetry-apps-api
+          [ "${{ steps.filter.outputs.mqtt }}" = "true" ] && add mqtt . services/input/mqtt/Dockerfile telemetry-services-input-mqtt
+          [ "${{ steps.filter.outputs.chirpstackv4 }}" = "true" ] && add chirpstackv4 . services/bridge/chirpstackv4/Dockerfile telemetry-services-bridge-chirpstackv4
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "Changed services: $matrix"
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,10 +77,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push ${{ matrix.service.name }}
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: docker/Dockerfile
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
           push: true
-          tags: smartcampusmaua/parse-mqtt-to-influxdb3:0.20
+          tags: ${{ matrix.service.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
