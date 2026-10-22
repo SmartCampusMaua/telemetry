@@ -83,6 +83,6 @@ jobs:
           context: ${{ matrix.service.context }}
           file: ${{ matrix.service.dockerfile }}
           push: true
-          tags: ${{ matrix.service.image }}:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service.image }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.service.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
