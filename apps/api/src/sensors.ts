@@ -1,46 +1,19 @@
-// Loads the sensor/device/asset registries straight from parse-mqtt-to-influxdb3 — the sibling
-// repo that's the actual source of truth for sensor_id assignment (see its own sensors.json/
-// devices.json/assets.json). This is an interim measure: hardcoded relative paths only work when this repo
-// and parse-mqtt-to-influxdb3 are checked out side by side on the same machine, which is true
-// for local dev but not for a deployed image (there's no sibling checkout inside a Docker
-// container). Once both files are made available to this service properly (a shared registry
-// service, or mirrored/mounted the way infra.json is), swap the paths below for that — no
-// other code here needs to change, since everything downstream only depends on `sensorRegistry`.
+// Loads the sensor/device/asset registry from Postgres (src/db/schema.ts) — the same tables
+// src/routes/registry.ts serves over HTTP — instead of the sibling parse-mqtt-to-influxdb3
+// repo's sensors.json/devices.json/assets.json, which this used to read directly via hardcoded
+// relative paths (a local-dev-only arrangement that only worked when both repos were checked out
+// side by side, and never worked inside a Docker image). Postgres is the real source of truth
+// now; see scripts/import-registry.ts for the one-time bootstrap that originally populated it
+// from those same JSON files.
 //
-// Unlike config.ts's infra.json, a bad/missing file here does NOT crash the process: this
+// Unlike config.ts's infra.json, a bad/missing load here does NOT crash the process: this
 // registry is a convenience for the sensor-picker UI and the /:org/sensors endpoint, not
-// something the core timeseries routes depend on to function. Missing it should degrade that one
-// feature, not take the whole API down.
+// something the core timeseries routes depend on to function. A failed load should degrade that
+// one feature, not take the whole API down.
 
-import { readFileSync } from "fs";
-
-type SensorEntry = {
-  sensor_id: string;
-  sensor_type: string;
-  device_id: string;
-  device_index?: number;
-  sensor_name?: string;
-};
-type DeviceEntry = {
-  device_id: string;
-  device_model: string;
-  device_type: string;
-  serial_number: string;
-  dev_eui?: string;
-  mac_address?: string;
-};
-// device_ids is authored on the asset side (one asset -> many devices), same as
-// parse-mqtt-to-influxdb3's AssetEntry/GetAssetsMap — resolved below into a
-// device_id -> asset lookup, the inverse direction SensorInfo actually needs.
-// asset_name/asset_slug are optional since older entries may not have them yet — asset_slug is
-// the stable, lowercase-kebab-case filter key (?assetSlug=), asset_name is a free-text display
-// label with no filtering role, same split as sensor_id/sensor_name already have for sensors.
-type AssetEntry = {
-  asset_id: string;
-  asset_name?: string;
-  asset_slug?: string;
-  device_ids?: string[];
-};
+import { eq, or } from "drizzle-orm";
+import { db } from "./db/client";
+import { assets, devices, sensors } from "./db/schema";
 
 export type SensorInfo = {
   sensor_id: string;
@@ -55,60 +28,49 @@ export type SensorInfo = {
   asset_slug?: string;
 };
 
-const SENSORS_FILE = process.env.SENSORS_CONFIG_FILE ?? "../parse-mqtt-to-influxdb3/sensors.json";
-const DEVICES_FILE = process.env.DEVICES_CONFIG_FILE ?? "../parse-mqtt-to-influxdb3/devices.json";
-const ASSETS_FILE = process.env.ASSETS_CONFIG_FILE ?? "../parse-mqtt-to-influxdb3/assets.json";
 const REFRESH_SEC = Number(process.env.SENSORS_CONFIG_REFRESH_SEC) || 30;
 
-function readJson<T>(path: string): T {
-  let raw: string;
-  try {
-    raw = readFileSync(path, "utf-8");
-  } catch (err) {
-    throw new Error(`read ${path}: ${err instanceof Error ? err.message : err}`);
-  }
-  try {
-    return JSON.parse(raw) as T;
-  } catch (err) {
-    throw new Error(`parse ${path}: ${err instanceof Error ? err.message : err}`);
-  }
-}
+// Effective asset for a sensor is sensor.asset_id if set, else its device's own asset_id (see
+// schema.ts's comment on sensors.asset_id) — resolved here with a single left join on each
+// rather than two round trips + an in-memory join, now that both tables live in the same
+// database.
+async function loadRegistry(): Promise<SensorInfo[]> {
+  const rows = await db
+    .select({
+      sensor_id: sensors.id,
+      sensor_type: sensors.sensor_type,
+      sensor_name: sensors.sensor_name,
+      device_id: sensors.device_id,
+      device_model: devices.device_model,
+      dev_eui: devices.dev_eui,
+      mac_address: devices.mac_address,
+      asset_id: sensors.asset_id,
+      device_asset_id: devices.asset_id,
+    })
+    .from(sensors)
+    .innerJoin(devices, eq(sensors.device_id, devices.id));
 
-// Joins sensors.json's {sensor_id, sensor_type, device_id} against devices.json's device
-// identity/model, so the picker UI (and the /sensors endpoint) can show something more useful
-// than a bare device_id — device_model + dev_eui/mac_address, and sensor_name when the sensor
-// registry has one (only ~2% of entries do — the multi-probe/multi-valve sensors that actually
-// need a human label to disambiguate; everything else falls back to sensor_type as its label).
-// asset_id comes from a second join (assets.json), same one-to-many resolution as
-// parse-mqtt-to-influxdb3's GetAssetsMap: most devices aren't assigned to an asset yet, so this
-// is undefined far more often than device_model/dev_eui/mac_address are.
-function loadRegistry(): SensorInfo[] {
-  const sensorsFile = readJson<{ sensors: SensorEntry[] }>(SENSORS_FILE);
-  const devicesFile = readJson<{ devices: DeviceEntry[] }>(DEVICES_FILE);
-  const assetsFile = readJson<{ assets: AssetEntry[] }>(ASSETS_FILE);
-  if (!Array.isArray(sensorsFile.sensors)) throw new Error(`${SENSORS_FILE}: "sensors" must be an array`);
-  if (!Array.isArray(devicesFile.devices)) throw new Error(`${DEVICES_FILE}: "devices" must be an array`);
-  if (!Array.isArray(assetsFile.assets)) throw new Error(`${ASSETS_FILE}: "assets" must be an array`);
+  const effectiveAssetIds = [...new Set(rows.map((r) => r.asset_id ?? r.device_asset_id).filter((id): id is string => !!id))];
+  const assetRows = effectiveAssetIds.length
+    ? await db
+        .select({ id: assets.id, asset_name: assets.asset_name, asset_slug: assets.asset_slug })
+        .from(assets)
+        .where(or(...effectiveAssetIds.map((id) => eq(assets.id, id))))
+    : [];
+  const assetById = new Map(assetRows.map((a) => [a.id, a]));
 
-  const devicesById = new Map(devicesFile.devices.map((d) => [d.device_id, d]));
-  const assetByDeviceId = new Map<string, AssetEntry>();
-  for (const asset of assetsFile.assets) {
-    for (const deviceId of asset.device_ids ?? []) {
-      assetByDeviceId.set(deviceId, asset);
-    }
-  }
-  return sensorsFile.sensors.map((s) => {
-    const device = devicesById.get(s.device_id);
-    const asset = assetByDeviceId.get(s.device_id);
+  return rows.map((r) => {
+    const effectiveAssetId = r.asset_id ?? r.device_asset_id ?? undefined;
+    const asset = effectiveAssetId ? assetById.get(effectiveAssetId) : undefined;
     return {
-      sensor_id: s.sensor_id,
-      sensor_type: s.sensor_type,
-      sensor_name: s.sensor_name,
-      device_id: s.device_id,
-      device_model: device?.device_model,
-      dev_eui: device?.dev_eui,
-      mac_address: device?.mac_address,
-      asset_id: asset?.asset_id,
+      sensor_id: r.sensor_id,
+      sensor_type: r.sensor_type,
+      sensor_name: r.sensor_name ?? undefined,
+      device_id: r.device_id,
+      device_model: r.device_model,
+      dev_eui: r.dev_eui ?? undefined,
+      mac_address: r.mac_address ?? undefined,
+      asset_id: effectiveAssetId,
       asset_name: asset?.asset_name,
       asset_slug: asset?.asset_slug,
     };
@@ -196,25 +158,20 @@ export function sensorsByAssetSlug(assetSlug: string): SensorInfo[] {
 let registry: SensorInfo[] = [];
 let loadError: string | undefined;
 
-try {
-  registry = loadRegistry();
-  applyIndexes(registry);
-  console.log(`[sensors] loaded ${SENSORS_FILE} + ${DEVICES_FILE} + ${ASSETS_FILE}: ${registry.length} sensors`);
-} catch (err) {
-  loadError = err instanceof Error ? err.message : String(err);
-  console.error(`[sensors] initial load failed — the /sensors endpoint will report this error until it's fixed: ${loadError}`);
-}
-
-setInterval(() => {
+async function load(): Promise<void> {
   try {
-    registry = loadRegistry();
+    registry = await loadRegistry();
     applyIndexes(registry);
     loadError = undefined;
+    console.log(`[sensors] loaded registry from Postgres: ${registry.length} sensors`);
   } catch (err) {
     loadError = err instanceof Error ? err.message : String(err);
-    console.error(`[sensors] reload failed, keeping previous registry: ${loadError}`);
+    console.error(`[sensors] load failed, keeping previous registry: ${loadError}`);
   }
-}, REFRESH_SEC * 1000).unref();
+}
+
+void load();
+setInterval(load, REFRESH_SEC * 1000).unref();
 
 export const sensorRegistry = {
   get list(): SensorInfo[] {

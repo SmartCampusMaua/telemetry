@@ -1,0 +1,7 @@
+-Wno-frame-address
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
+"-specs=/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/rsu/build/specs/picolibc.specs"
+-fno-rtti

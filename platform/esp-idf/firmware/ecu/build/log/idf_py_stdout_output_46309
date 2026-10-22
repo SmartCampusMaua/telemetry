@@ -1,0 +1,121 @@
+Command: /Users/rogeriocassares/.espressif/python_env/idf6.0_py3.14_env/bin/python /Users/rogeriocassares/.espressif/v6.0.2/esp-idf/tools/idf_monitor.py -p /dev/tty.wchusbserial58960310481 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/zc2x_ecu.elf /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/bootloader/bootloader.elf -m '/Users/rogeriocassares/.espressif/python_env/idf6.0_py3.14_env/bin/python' '/Users/rogeriocassares/.espressif/v6.0.2/esp-idf/tools/idf.py' '-p' '/dev/tty.wchusbserial58960310481'
+���p�ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x1a (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2f54
+entry 0x403c8908
+[0;32mI (24) boot: ESP-IDF v6.0.2 2nd stage bootloader[0m
+[0;32mI (25) boot: compile time Jul 14 2026 19:01:38[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (25) boot: chip revision: v0.2[0m
+[0;32mI (28) boot: efuse block revision: v1.3[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 2MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (63) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=0a9cch ( 43468) map[0m
+[0;32mI (94) esp_image: segment 1: paddr=0001a9f4 vaddr=3fc90500 size=030d8h ( 12504) load[0m
+[0;32mI (97) esp_image: segment 2: paddr=0001dad4 vaddr=40374000 size=02544h (  9540) load[0m
+[0;32mI (103) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=14900h ( 84224) map[0m
+[0;32mI (124) esp_image: segment 4: paddr=00034928 vaddr=40376544 size=09ecch ( 40652) load[0m
+[0;32mI (134) esp_image: segment 5: paddr=0003e7fc vaddr=50000000 size=00024h (    36) load[0m
+[0;32mI (139) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (140) boot: Disabling RNG early entropy source...[0m
+[0;32mI (151) cpu_start: Multicore app[0m
+[0;32mI (160) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (161) cpu_start: Pro cpu start user code[0m
+[0;32mI (161) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (162) app_init: Application information:[0m
+[0;32mI (166) app_init: Project name:     zc2x_ecu[0m
+[0;32mI (170) app_init: App version:      v0.1.0-foundation-3-g0fbe8bf-di[0m
+[0;32mI (176) app_init: Compile time:     Jul 14 2026 19:01:35[0m
+[0;32mI (181) app_init: ELF file SHA256:  fb392b3d3...[0m
+[0;32mI (185) app_init: ESP-IDF:          v6.0.2[0m
+[0;32mI (189) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (193) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (197) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (201) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (207) heap_init: At 3FC94140 len 000555D0 (341 KiB): RAM[0m
+[0;32mI (212) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (217) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (223) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (229) spi_flash: detected chip: winbond[0m
+[0;32mI (232) spi_flash: flash io: dio[0m
+[0;33mW (235) spi_flash: Detected size(16384k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (247) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (253) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (260) main_task: Started on CPU0[0m
+[0;32mI (280) main_task: Calling app_main()[0m
+[0;32mI (280) ECU: ZC2X ECU simulator starting (7 simulated CAN messages)[0m
+[0;32mI (280) ECU: TWAI (CAN) tx ready: TX=1 RX=21 bitrate=1000000[0m
+[0;32mI (280) main_task: Returned from app_main()[0m
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x1a (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2f54
+entry 0x403c8908
+[0;32mI (24) boot: ESP-IDF v6.0.2 2nd stage bootloader[0m
+[0;32mI (25) boot: compile time Jul 14 2026 19:01:38[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (25) boot: chip revision: v0.2[0m
+[0;32mI (28) boot: efuse block revision: v1.3[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 2MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (63) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=0a9cch ( 43468) map[0m
+[0;32mI (94) esp_image: segment 1: paddr=0001a9f4 vaddr=3fc90500 size=030d8h ( 12504) load[0m
+[0;32mI (97) esp_image: segment 2: paddr=0001dad4 vaddr=40374000 size=02544h (  9540) load[0m
+[0;32mI (103) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=14900h ( 84224) map[0m
+[0;32mI (124) esp_image: segment 4: paddr=00034928 vaddr=40376544 size=09ecch ( 40652) load[0m
+[0;32mI (134) esp_image: segment 5: paddr=0003e7fc vaddr=50000000 size=00024h (    36) load[0m
+[0;32mI (139) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (140) boot: Disabling RNG early entropy source...[0m
+[0;32mI (151) cpu_start: Multicore app[0m
+[0;32mI (160) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (161) cpu_start: Pro cpu start user code[0m
+[0;32mI (161) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (162) app_init: Application information:[0m
+[0;32mI (166) app_init: Project name:     zc2x_ecu[0m
+[0;32mI (170) app_init: App version:      v0.1.0-foundation-3-g0fbe8bf-di[0m
+[0;32mI (176) app_init: Compile time:     Jul 14 2026 19:01:35[0m
+[0;32mI (181) app_init: ELF file SHA256:  fb392b3d3...[0m
+[0;32mI (185) app_init: ESP-IDF:          v6.0.2[0m
+[0;32mI (189) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (193) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (197) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (201) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (207) heap_init: At 3FC94140 len 000555D0 (341 KiB): RAM[0m
+[0;32mI (212) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (217) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (223) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (229) spi_flash: detected chip: winbond[0m
+[0;32mI (232) spi_flash: flash io: dio[0m
+[0;33mW (235) spi_flash: Detected size(16384k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (247) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (253) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (260) main_task: Started on CPU0[0m
+[0;32mI (280) main_task: Calling app_main()[0m
+[0;32mI (280) ECU: ZC2X ECU simulator starting (7 simulated CAN messages)[0m
+[0;32mI (280) ECU: TWAI (CAN) tx ready: TX=1 RX=21 bitrate=1000000[0m
+[0;32mI (280) main_task: Returned from app_main()[0m

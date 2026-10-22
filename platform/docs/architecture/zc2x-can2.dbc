@@ -1,0 +1,544 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: ECU OBU TTUFL TTUFR TTURL TTURR PDM30 M150 C125 L180
+
+BO_ 256 CD1: 8 ECU
+ SG_ WheelSpeedFL : 0|16@1+ (0.1,0) [0|300] "km/h" OBU
+ SG_ WheelSpeedFR : 16|16@1+ (0.1,0) [0|300] "km/h" OBU
+ SG_ WheelSpeedRL : 32|16@1+ (0.1,0) [0|300] "km/h" OBU
+ SG_ WheelSpeedRR : 48|16@1+ (0.1,0) [0|300] "km/h" OBU
+
+BO_ 272 CD2: 4 ECU
+ SG_ SteeringAngle : 0|16@1+ (0.1,-720) [-720|720] "deg" OBU
+ SG_ GroundSpeed : 16|16@1+ (0.1,0) [0|300] "km/h" OBU
+
+BO_ 288 CD3: 4 ECU
+ SG_ BrakePressureFront : 0|16@1+ (0.1,0) [0|200] "bar" OBU
+ SG_ BrakePressureRear : 16|16@1+ (0.1,0) [0|200] "bar" OBU
+
+BO_ 368 CD4: 6 ECU
+ SG_ GForceLateral : 0|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ GForceLongitudinal : 16|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ GForceVertical : 32|16@1+ (0.001,-5) [-5|5] "g" OBU
+
+BO_ 369 CD5: 4 ECU
+ SG_ RollAngle : 0|16@1+ (0.01,-45) [-45|45] "deg" OBU
+ SG_ PitchAngle : 16|16@1+ (0.01,-45) [-45|45] "deg" OBU
+
+BO_ 370 CD6: 8 ECU
+ SG_ DamperPositionFL : 0|16@1+ (0.01,0) [0|150] "mm" OBU
+ SG_ DamperPositionFR : 16|16@1+ (0.01,0) [0|150] "mm" OBU
+ SG_ DamperPositionRL : 32|16@1+ (0.01,0) [0|150] "mm" OBU
+ SG_ DamperPositionRR : 48|16@1+ (0.01,0) [0|150] "mm" OBU
+
+BO_ 371 CD7: 6 ECU
+ SG_ YawRate : 0|16@1+ (0.01,-163) [-163|163] "deg/s" OBU
+ SG_ RollRate : 16|16@1+ (0.01,-163) [-163|163] "deg/s" OBU
+ SG_ PitchRate : 32|16@1+ (0.01,-163) [-163|163] "deg/s" OBU
+
+BO_ 304 TTUFL: 8 TTUFL
+ SG_ TireTempInnerFL : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempMiddleFL : 16|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempOuterFL : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TirePressureFL : 48|16@1+ (0.01,0) [0|4] "bar" OBU
+
+BO_ 320 TTUFR: 8 TTUFR
+ SG_ TireTempInnerFR : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempMiddleFR : 16|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempOuterFR : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TirePressureFR : 48|16@1+ (0.01,0) [0|4] "bar" OBU
+
+BO_ 336 TTURL: 8 TTURL
+ SG_ TireTempInnerRL : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempMiddleRL : 16|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempOuterRL : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TirePressureRL : 48|16@1+ (0.01,0) [0|4] "bar" OBU
+
+BO_ 352 TTURR: 8 TTURR
+ SG_ TireTempInnerRR : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempMiddleRR : 16|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TireTempOuterRR : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ TirePressureRR : 48|16@1+ (0.01,0) [0|4] "bar" OBU
+
+BO_ 512 PE1: 8 ECU
+ SG_ EngineRPM : 0|16@1+ (1,0) [0|16000] "rpm" OBU
+ SG_ ThrottlePosition : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ Lambda1 : 24|16@1+ (0.001,0.5) [0.5|1.5] "" OBU
+ SG_ ManifoldAirPressure : 40|16@1+ (0.1,0) [0|300] "kPa" OBU
+ SG_ Gear : 56|8@1+ (1,0) [0|255] "" OBU
+
+BO_ 528 PE2: 8 ECU
+ SG_ EngineCoolantTemperature : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ EngineOilTemperature : 16|16@1+ (0.1,-40) [-40|170] "C" OBU
+ SG_ ManifoldAirTemperature : 32|16@1+ (0.1,-40) [-40|120] "C" OBU
+ SG_ EngineOilPressure : 48|16@1+ (0.1,0) [0|10] "bar" OBU
+
+BO_ 529 PE3: 6 ECU
+ SG_ FuelLinePressure : 0|16@1+ (0.1,0) [0|10] "bar" OBU
+ SG_ FuelUsedRaw : 16|32@1- (1,0) [0|2147483647] "" OBU
+
+BO_ 544 PE4: 8 ECU
+ SG_ ExhaustCylinderTemperature1 : 0|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature2 : 16|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature3 : 32|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature4 : 48|16@1+ (1,0) [0|1200] "C" OBU
+
+BO_ 545 PE5: 8 ECU
+ SG_ ExhaustCylinderTemperature5 : 0|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature6 : 16|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature7 : 32|16@1+ (1,0) [0|1200] "C" OBU
+ SG_ ExhaustCylinderTemperature8 : 48|16@1+ (1,0) [0|1200] "C" OBU
+
+BO_ 768 GPS1: 8 ECU
+ SG_ Latitude : 0|32@1- (0.0000001,0) [-90|90] "deg" OBU
+ SG_ Longitude : 32|32@1- (0.0000001,0) [-180|180] "deg" OBU
+
+BO_ 784 GPS2: 6 ECU
+ SG_ Altitude : 0|16@1+ (0.1,-1000) [-1000|5553.5] "m" OBU
+ SG_ GPSSpeed : 16|16@1+ (0.1,0) [0|300] "km/h" OBU
+ SG_ GPSHeading : 32|16@1+ (0.01,0) [0|360] "deg" OBU
+
+BO_ 1024 PD1: 8 PDM30
+ SG_ PDMBatteryVoltage : 0|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ PDMTotalCurrent : 16|16@1+ (0.1,0) [0|400] "A" OBU
+ SG_ PDMInternalTemp : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ PDMGlobalErrorFlags : 48|8@1+ (1,0) [0|255] "" OBU
+ SG_ PDMInternalRailVoltage : 56|8@1+ (0.1,0) [0|25.5] "V" OBU
+
+BO_ 1025 PD2: 8 PDM30
+ SG_ OutputCurrent1 : 0|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent2 : 8|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent3 : 16|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent4 : 24|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent5 : 32|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent6 : 40|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent7 : 48|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent8 : 56|8@1+ (0.1,0) [0|25.5] "A" OBU
+
+BO_ 1026 PD3: 8 PDM30
+ SG_ OutputCurrent9 : 0|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent10 : 8|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent11 : 16|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent12 : 24|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent13 : 32|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent14 : 40|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent15 : 48|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent16 : 56|8@1+ (0.1,0) [0|25.5] "A" OBU
+
+BO_ 1027 PD4: 8 PDM30
+ SG_ OutputCurrent17 : 0|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent18 : 8|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent19 : 16|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent20 : 24|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent21 : 32|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent22 : 40|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent23 : 48|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent24 : 56|8@1+ (0.1,0) [0|25.5] "A" OBU
+
+BO_ 1028 PD5: 6 PDM30
+ SG_ OutputCurrent25 : 0|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent26 : 8|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent27 : 16|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent28 : 24|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent29 : 32|8@1+ (0.1,0) [0|25.5] "A" OBU
+ SG_ OutputCurrent30 : 40|8@1+ (0.1,0) [0|25.5] "A" OBU
+
+BO_ 1029 PD6: 8 PDM30
+ SG_ OutputVoltage1 : 0|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage2 : 8|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage3 : 16|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage4 : 24|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage5 : 32|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage6 : 40|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage7 : 48|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage8 : 56|8@1+ (0.1,0) [0|25.5] "V" OBU
+
+BO_ 1030 PD7: 8 PDM30
+ SG_ OutputVoltage9 : 0|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage10 : 8|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage11 : 16|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage12 : 24|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage13 : 32|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage14 : 40|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage15 : 48|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage16 : 56|8@1+ (0.1,0) [0|25.5] "V" OBU
+
+BO_ 1031 PD8: 8 PDM30
+ SG_ OutputVoltage17 : 0|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage18 : 8|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage19 : 16|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage20 : 24|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage21 : 32|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage22 : 40|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage23 : 48|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage24 : 56|8@1+ (0.1,0) [0|25.5] "V" OBU
+
+BO_ 1032 PD9: 6 PDM30
+ SG_ OutputVoltage25 : 0|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage26 : 8|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage27 : 16|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage28 : 24|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage29 : 32|8@1+ (0.1,0) [0|25.5] "V" OBU
+ SG_ OutputVoltage30 : 40|8@1+ (0.1,0) [0|25.5] "V" OBU
+
+BO_ 1033 PD10: 4 PDM30
+ SG_ OutputStatus1 : 0|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus2 : 1|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus3 : 2|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus4 : 3|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus5 : 4|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus6 : 5|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus7 : 6|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus8 : 7|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus9 : 8|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus10 : 9|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus11 : 10|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus12 : 11|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus13 : 12|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus14 : 13|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus15 : 14|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus16 : 15|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus17 : 16|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus18 : 17|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus19 : 18|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus20 : 19|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus21 : 20|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus22 : 21|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus23 : 22|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus24 : 23|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus25 : 24|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus26 : 25|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus27 : 26|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus28 : 27|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus29 : 28|1@1+ (1,0) [0|1] "" OBU
+ SG_ OutputStatus30 : 29|1@1+ (1,0) [0|1] "" OBU
+
+BO_ 1034 PD11: 2 PDM30
+ SG_ InputState1 : 0|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState2 : 1|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState3 : 2|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState4 : 3|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState5 : 4|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState6 : 5|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState7 : 6|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState8 : 7|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState9 : 8|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState10 : 9|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState11 : 10|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState12 : 11|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState13 : 12|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState14 : 13|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState15 : 14|1@1+ (1,0) [0|1] "" OBU
+ SG_ InputState16 : 15|1@1+ (1,0) [0|1] "" OBU
+
+BO_ 1035 PD12: 8 PDM30
+ SG_ InputVoltage1 : 0|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage2 : 16|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage3 : 32|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage4 : 48|16@1+ (0.01,0) [0|20] "V" OBU
+
+BO_ 1036 PD13: 8 PDM30
+ SG_ InputVoltage5 : 0|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage6 : 16|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage7 : 32|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage8 : 48|16@1+ (0.01,0) [0|20] "V" OBU
+
+BO_ 1037 PD14: 8 PDM30
+ SG_ InputVoltage9 : 0|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage10 : 16|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage11 : 32|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage12 : 48|16@1+ (0.01,0) [0|20] "V" OBU
+
+BO_ 1038 PD15: 8 PDM30
+ SG_ InputVoltage13 : 0|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage14 : 16|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage15 : 32|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ InputVoltage16 : 48|16@1+ (0.01,0) [0|20] "V" OBU
+
+BO_ 1039 PD16: 8 PDM30
+ SG_ OutputLoad1 : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad2 : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad3 : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad4 : 24|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad5 : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad6 : 40|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad7 : 48|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad8 : 56|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1040 PD17: 8 PDM30
+ SG_ OutputLoad9 : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad10 : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad11 : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad12 : 24|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad13 : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad14 : 40|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad15 : 48|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad16 : 56|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1041 PD18: 8 PDM30
+ SG_ OutputLoad17 : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad18 : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad19 : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad20 : 24|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad21 : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad22 : 40|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad23 : 48|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad24 : 56|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1042 PD19: 6 PDM30
+ SG_ OutputLoad25 : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad26 : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad27 : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad28 : 24|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad29 : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ OutputLoad30 : 40|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1088 EC1: 8 M150
+ SG_ Lambda2 : 0|16@1+ (0.001,0.5) [0.5|1.5] "" OBU
+ SG_ IgnitionTiming : 16|16@1+ (0.1,-10) [-10|60] "deg" OBU
+ SG_ ECUBatteryVoltage : 32|16@1+ (0.01,0) [0|20] "V" OBU
+ SG_ BarometricPressure : 48|16@1+ (0.1,80) [80|110] "kPa" OBU
+
+BO_ 1089 EC2: 6 M150
+ SG_ KnockLevel : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ InjectorDutyCycle : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ CamAngleIntake : 16|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamAngleExhaust : 32|16@1+ (0.1,-30) [-30|30] "deg" OBU
+
+BO_ 1090 EC3: 8 M150
+ SG_ GearboxTemperature : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ IntakeAirTemperature : 16|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ AirTemperature : 32|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ AmbientAirTemperature : 48|16@1+ (0.1,-40) [-40|150] "C" OBU
+
+BO_ 1091 EC4: 8 M150
+ SG_ FuelTemperature : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ CoolantPressure : 16|16@1+ (0.1,0) [0|10] "bar" OBU
+ SG_ SteeringPressure : 32|16@1+ (0.1,0) [0|50] "bar" OBU
+ SG_ FuelInjectionTime : 48|16@1+ (0.01,0) [0|20] "ms" OBU
+
+BO_ 1092 EC5: 7 M150
+ SG_ BoostPressureTarget : 0|16@1+ (0.1,0) [0|400] "kPa" OBU
+ SG_ BoostPressure : 16|16@1+ (0.1,0) [0|400] "kPa" OBU
+ SG_ EngineLoadAverage : 32|16@1+ (0.1,0) [0|200] "%" OBU
+ SG_ FuelComposition : 48|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1093 EC6: 8 M150
+ SG_ CamIntakeBank1Position : 0|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamIntakeBank2Position : 16|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamExhaustBank1Position : 32|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamExhaustBank2Position : 48|16@1+ (0.1,-30) [-30|30] "deg" OBU
+
+BO_ 1094 EC7: 8 M150
+ SG_ CamIntakeTarget : 0|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamExhaustTarget : 16|16@1+ (0.1,-30) [-30|30] "deg" OBU
+ SG_ CamIntakeBank1DutyCycle : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ CamIntakeBank2DutyCycle : 40|8@1+ (1,0) [0|100] "%" OBU
+ SG_ CamExhaustBank1DutyCycle : 48|8@1+ (1,0) [0|100] "%" OBU
+ SG_ CamExhaustBank2DutyCycle : 56|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1095 EC8: 8 M150
+ SG_ KnockLevelCylinder1 : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder2 : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder3 : 16|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder4 : 24|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder5 : 32|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder6 : 40|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder7 : 48|8@1+ (1,0) [0|100] "%" OBU
+ SG_ KnockLevelCylinder8 : 56|8@1+ (1,0) [0|100] "%" OBU
+
+BO_ 1096 EC9: 8 M150
+ SG_ IgnitionKnockTrimCylinder1 : 0|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder2 : 8|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder3 : 16|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder4 : 24|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder5 : 32|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder6 : 40|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder7 : 48|8@1+ (0.2,-20) [-20|31] "deg" OBU
+ SG_ IgnitionKnockTrimCylinder8 : 56|8@1+ (0.2,-20) [-20|31] "deg" OBU
+
+BO_ 1097 EC10: 7 M150
+ SG_ FuelOutputLevel : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ IgnitionOutputLevel : 8|8@1+ (1,0) [0|100] "%" OBU
+ SG_ EngineRunning : 16|8@1+ (1,0) [0|1] "" OBU
+ SG_ IgnitionCutRequest : 24|8@1+ (1,0) [0|1] "" OBU
+ SG_ LaunchControlState : 32|8@1+ (1,0) [0|10] "" OBU
+ SG_ AntiLagState : 40|8@1+ (1,0) [0|1] "" OBU
+ SG_ GearLeverPosition : 48|8@1+ (1,0) [0|255] "" OBU
+
+BO_ 1098 EC11: 6 M150
+ SG_ FuelLevel : 0|8@1+ (1,0) [0|100] "%" OBU
+ SG_ IgnitionTimeStage : 8|8@1+ (1,0) [0|255] "" OBU
+ SG_ EngineRunTimeTotal : 16|32@1- (1,0) [0|2147483647] "s" OBU
+
+BO_ 1099 EC12: 2 M150
+ SG_ WarningFlag1 : 0|8@1+ (1,0) [0|255] "" OBU
+ SG_ WarningFlag2 : 8|8@1+ (1,0) [0|255] "" OBU
+
+BO_ 1120 DA1: 6 C125
+ SG_ DashGForceLateral : 0|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ DashGForceLongitudinal : 16|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ DashGForceVertical : 32|16@1+ (0.001,-5) [-5|5] "g" OBU
+
+BO_ 1121 DA2: 6 C125
+ SG_ DashTemperature : 0|16@1+ (0.1,-40) [-40|150] "C" OBU
+ SG_ DashSensorSupplyVoltage : 16|16@1+ (0.01,0) [0|10] "V" OBU
+ SG_ DashBatteryVoltage : 32|16@1+ (0.01,0) [0|20] "V" OBU
+
+BO_ 1136 LG1: 6 L180
+ SG_ LoggerGForceLateral : 0|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ LoggerGForceLongitudinal : 16|16@1+ (0.001,-5) [-5|5] "g" OBU
+ SG_ LoggerGForceVertical : 32|16@1+ (0.001,-5) [-5|5] "g" OBU
+
+CM_ BU_ ECU "Vehicle CAN2 transmitter: the ecu/ firmware simulator in dev/test, or a MoTeC M180 ECU/logger's User CAN output on CAN2 in production. See platform/esp-idf/firmware/ecu/main/main.c and docs/architecture/RFC-0001-UNIVERSAL-PACKET.md.";
+CM_ BU_ OBU "ZC2X on-board unit; forwards every CAN ID unmodified over XBee/WiFi (see platform/esp-idf/firmware/obu/main/main.c can_init()).";
+CM_ BU_ TTUFL "Front-left tire temperature unit: reads 3 non-contact infrared sensors spanning the tread (inner/middle/outer, inner = toward vehicle centerline) and transmits on CAN2. One physically independent CAN node per wheel — unlike CD1's wheel speeds, these are 4 separate transmitters, not 4 signals aggregated by one ECU. See TTUFR/TTURL/TTURR for the other three corners.";
+CM_ BU_ TTUFR "Front-right tire temperature unit — see TTUFL for the shared design rationale.";
+CM_ BU_ TTURL "Rear-left tire temperature unit — see TTUFL for the shared design rationale.";
+CM_ BU_ TTURR "Rear-right tire temperature unit — see TTUFL for the shared design rationale.";
+CM_ BU_ PDM30 "MoTeC PDM30 power distribution module: 8x20A + 22x8A switched outputs (30 total), 16 switch inputs. Custom re-aggregation for our own CAN2, not a mirror of the PDM's native CAN broadcast (which uses its own fixed IDs/layout, e.g. 0x500-0x505 — deliberately avoided here so the two never collide if the PDM's native output is ever bridged onto the same physical bus). Field widths (8-bit for per-output current/voltage, 1-bit for status/input flags) deliberately mirror MoTeC's own real PDM DBC convention (confirmed via a genuine PDM15 CAN-import screenshot: all channels unsigned, narrow, heavily bit-packed) rather than this file's usual finer 16-bit temperature/pressure resolution — with 30 outputs, matching MoTeC's own choice keeps the message count sane.";
+CM_ BU_ M150 "MoTeC M150 ECU (Port Injection, M1-series). Core engine channels (RPM/throttle/lambda/MAP/gear/temps/pressures/EGT) already covered by CD1-3/PE1-4 above; EC1-EC12 below mirror the rest of the M1 family's real, documented channel set (RPM/Gear/WheelSpeed/temps/pressures/cam/knock/fuel/warnings) as confirmed by a genuine third-party integration guide (AiM InfoTech 'MoTeC M1' Release 1.02, which explicitly lists M150 as a supported model sharing the same 'M1 General' CAN protocol as M130/M142/M170/M181/M182/M190) -- not this project's own guesswork, and not a byte-exact mirror of M1's actual wire format (that uses MoTeC's own fixed IDs/scaling starting at 0x640, which we deliberately don't mirror -- same reasoning as PDM30, see that comment). Per-cylinder channels (EC8/EC9) are sized for up to 8 cylinders, the max the source document enumerates; a real engine with fewer cylinders just never transmits the unused ones -- harmless to over-provision.";
+CM_ BU_ C125 "MoTeC C125 colour dash display/logger: has its own internal sensors (3-axis G, dash temperature, regulated sensor supply voltage, battery voltage measured at the dash) independent of the PDM's or ECU's own readings of similar quantities — deliberately kept as separate signals (DashBatteryVoltage vs PDMBatteryVoltage vs ECUBatteryVoltage) rather than collapsed into one, same cross-validation reasoning as CD2's GroundSpeed vs GPS2's GPSSpeed: different measurement points can and do disagree, and that disagreement is itself diagnostic. No optional analog/digital I/O upgrade fitted on this build, so those extra channels aren't mapped.";
+CM_ BU_ L180 "MoTeC L180 enclosed data logger: has a built-in 3-axis accelerometer (+/-5G) — see LG1. GPS is external-only on this device (no built-in GPS module), so GPS1/GPS2 above already correctly represent an external GPS feed, not something L180 itself provides.";
+CM_ BO_ 256 "Chassis Dynamics 1: wheel speed sensors. 100 Hz. Named per MoTeC's generic dash/logger CAN convention (CD#=chassis dynamics, PE#=powertrain/engine), grouped by subsystem+update-rate rather than describing each message's exact field mix. Encoding convention for every signal in this file: unsigned (@1+), offset (the second value in the (factor,offset) pair) set to the signal's own physical minimum -- so raw=0 always decodes to [min], never a value below it. Applied uniformly (SteeringAngle/GForce*/tire and engine temperatures/Altitude all carry a negative offset this way) so every signal in the DBC shares one decode path -- no per-signal signed/unsigned branching needed downstream. Exception: Latitude/Longitude/FuelUsedRaw (see GPS1/PE3) are 32-bit signals kept signed (@1-) instead -- MoTeC's Dash Manager CAN import does not support unsigned 32-bit signals, confirmed in practice. This constraint is specific to 32-bit width; every 16-bit and 8-bit signal here stays unsigned per the rule above. Unit strings use plain 'C' for Celsius, not 'degC' -- also confirmed by MoTeC's importer flagging 'degC' as an unrecognized unit.";
+CM_ BO_ 272 "Chassis Dynamics 2: steering angle, ground speed. 100 Hz. G-force lived here originally but moved to CD4 (this file's central-IMU accelerometer message) once CD4 was added -- keeping a 2-axis G-force pair here and a 3rd axis in CD4 would have split one physical sensor's 3-axis reading across two unrelated messages, which is exactly the kind of redundant/fragmented design this file otherwise avoids.";
+CM_ BO_ 288 "Chassis Dynamics 3: brake line pressures, front/rear. 100 Hz.";
+CM_ BO_ 368 "Chassis Dynamics 4: the car's central chassis IMU's full 3-axis linear accelerometer (lateral/longitudinal/vertical) -- one message per physical sensor, not split (see CD2's comment for why lateral/longitudinal moved here from CD2). Range +/-4.2g matches the Bosch Motorsport MM7.10, a real combined 6-DOF automotive-motorsport IMU (standard fitment on GT3/LMP/DTM cars) -- widened slightly to +/-5g to match this file's existing DashGForce*/LoggerGForce* convention rather than fragmenting to a distinct G-force range just for this message. Deliberately separate from C125's/L180's own G sensors (DA1/LG1) -- different mounting location (central chassis vs dash vs logger), legitimate to disagree, same reasoning as those comments. See CD7 for this same IMU's rotational rate (gyroscope) output -- kept as a separate message, matching how a real IMU CAN interface is typically split (one frame per physical sensor type: accelerometer vs gyroscope), not because the data is unrelated. 100 Hz, matching CD1-3.";
+CM_ BO_ 369 "Chassis Dynamics 5: chassis attitude (roll/pitch angle), AHRS-derived from the same IMU as CD4/CD7. No yaw/heading angle here -- an absolute heading needs an external reference (magnetometer or GPS), and per CD4's comment we're deliberately not using a magnetometer anywhere in this file; GPS2's GPSHeading covers that need instead. 100 Hz, matching CD4/CD7.";
+CM_ BO_ 370 "Chassis Dynamics 6: damper (suspension) position, all 4 corners -- linear potentiometers wired to the ECU's own analog inputs (M150 supports flexible I/O per its datasheet), not a separate CAN transmitter per corner (contrast TTUFL/FR/RL/RR), since that's the real, common wiring pattern for this kind of sensor. High resolution (0.01mm/LSB) deliberately -- ride height and bump/rebound analysis care about sub-mm changes, and an aero-sensitive car's platform stability directly depends on this signal. 100 Hz, matching CD1-4.";
+CM_ BO_ 371 "Chassis Dynamics 7: the car's central chassis IMU's rotational rate (gyroscope) -- yaw/roll/pitch rate. See CD4's comment for why this is a separate message from the same IMU's accelerometer output (CD4), and the Bosch MM7.10 reference for the +/-163 deg/s range. 100 Hz, matching CD1-4/CD6.";
+CM_ BO_ 304 "Front-left tire surface temperature, 3-point IR array (inner/middle/outer across the tread), one Melexis MLX90614 non-contact IR thermometer per zone, plus tire pressure from the same physical unit -- combined IR-temp + pressure \"smart valve\" sensors are a real, common motorsport TPMS product category, so this isn't a stretch to co-locate with the temp sensors already at this node. 10 Hz — tire tread temperature changes slowly relative to IR sample rate, matching other thermally-slow messages (see PE2); tire pressure changes on a similar timescale (heat cycling), so the same rate covers it. Signals are suffixed FL (not shared TireTempInner/Middle/Outer names across TTUFL/TTUFR/TTURL/TTURR) so every signal name stays globally unique and self-describing, same reasoning as CD1's WheelSpeedFL/FR/RL/RR. One message per wheel rather than one shared message (contrast CD1) because each TTU is its own physical CAN transmitter. The TTU firmware does the sensor's raw-register -> Kelvin -> Celsius conversion (datasheet Sec 8.7: Temp[K] = raw15 * 0.02, then -273.15; raw15 is a 15-bit magnitude, bit 15 is a separate error flag masked off and not transmitted here). Signal encoding is deliberately standardized to match every other temperature signal in this file (EngineCoolantTemperature etc.) -- unsigned, offset -40 (this message's physical minimum, see CD1's comment for why every signal here follows that pattern), 0.1 C/LSB -- rather than mirroring the MLX90614's own native 0.02 C/LSB register step: the sensor's real-world accuracy is only +/-0.5..3 C depending on range (see datasheet Fig. 22), so 0.1 C/LSB loses no meaningful information, and one consistent temperature decode path beats a bespoke encoding per sensor family.";
+CM_ BO_ 320 "Front-right tire surface temperature + pressure — see BO_ 304 (TTUFL) for the shared design rationale.";
+CM_ BO_ 336 "Rear-left tire surface temperature + pressure — see BO_ 304 (TTUFL) for the shared design rationale.";
+CM_ BO_ 352 "Rear-right tire surface temperature + pressure — see BO_ 304 (TTUFL) for the shared design rationale.";
+CM_ BO_ 512 "Powertrain/Engine 1: core engine operating point — RPM, throttle, lambda, MAP, gear. 50 Hz. ManifoldAirPressure is deliberately here and NOT with ManifoldAirTemperature in PE2, despite both being 'intake' signals: MAP changes fast (boost/vacuum transients on tip-in/tip-out, knock correlation) and needs to track RPM/throttle at the same rate to be useful for tuning, while MAT is thermally slow (intake tract thermal mass) and gains nothing from fast sampling. Undersampling MAP to 10Hz to reunite it with MAT would lose real transient fidelity, which matters more here than thematic tidiness. PE1 and PE2 are also each already a full 8 bytes — classic CAN's frame limit means physically merging them isn't a free reshuffle either; it would require displacing another signal or a new dedicated message.";
+CM_ BO_ 528 "Powertrain/Engine 2: engine temperatures + oil pressure — coolant, oil temp, intake air temp, oil pressure. 10 Hz. All thermally-slow signals grouped together regardless of exact subsystem (coolant/oil/intake), matching MoTeC's own convention of one temps message per engine. See PE1's comment for why ManifoldAirPressure isn't here too.";
+CM_ BO_ 529 "Powertrain/Engine 3: fuel system only — line pressure, cumulative fuel used. 10 Hz. Deliberately separate from PE2 (was merged with engine temps/intake before — moved out for a cleaner engine-vs-fuel split). FuelUsedRaw is signed (@1-), not this file's usual unsigned-with-min-offset pattern (see CD1's comment) — MoTeC's Dash Manager doesn't support unsigned 32-bit signals. Range is [0|2147483647] (half of uint32's span) rather than the full [0|4294967295] a true unsigned counter would give; at any realistic CAN2 update rate this still takes tens of hours of continuous max-load accumulation to wrap, far beyond any real session length, so the halved range costs nothing in practice.";
+CM_ BO_ 544 "Powertrain/Engine 4: per-cylinder exhaust gas temperature (EGT), cylinders 1-4 of up to 8 (see PE5 for 5-8, and CM_ BU_ M150 for why 8 -- unused cylinders on smaller engines simply aren't transmitted, same convention as EC8/EC9's knock channels). 16-bit/cylinder (matches this file's other temperature signals, see BO_ 256's comment) caps a single classic-CAN 8-byte frame at 4 cylinders, hence the split into two messages rather than EC8/EC9's single 8-byte frame (which fits all 8 cylinders because knock level is only 8-bit/cylinder). 5 Hz — thermally slower than PE2/PE3, doesn't need the same rate.";
+CM_ BO_ 545 "Powertrain/Engine 5: per-cylinder exhaust gas temperature (EGT), cylinders 5-8 of up to 8 — see BO_ 544 (PE4) for the shared design rationale. 5 Hz, matching PE4.";
+CM_ BO_ 768 "GPS 1: latitude/longitude, WGS84 decimal degrees, signed 32-bit @ 1e-7 deg/LSB (~1.1cm resolution) — needs the extra precision a 16-bit signal can't give. Signed with offset 0 (not this file's usual unsigned-with-min-offset pattern, see CD1's comment) for two reasons: MoTeC's Dash Manager doesn't support unsigned 32-bit signals, and signed-at-zero is the natural fit here anyway — both signals are already zero-centered on their true physical reference (equator/prime meridian), unlike e.g. SteeringAngle or GForce where the offset trick is what makes the signal fit an unsigned encoding at all. 10 Hz assumed (typical GPS receiver fix rate); adjust ECU_CAN_PERIOD_GPS1_MS to match your actual module.";
+CM_ BO_ 784 "GPS 2: altitude (verify MSL vs WGS84-ellipsoid against your GPS module's datum config — the two can differ by tens of meters), GPS-derived ground speed, and GPS heading/course over ground. 10 Hz. GPSSpeed is intentionally a separate signal from CD2's GroundSpeed (wheel/ECU-derived): logging both lets you cross-validate against wheel slip, banking, and GPS dropout. GPSHeading is deliberately this file's only heading/orientation-about-vertical-axis source -- no magnetometer is used anywhere in this DBC (see CD4's comment): magnetic interference from the car's own ferrous structure and motors makes an in-car compass unreliable, while GPS course over ground is accurate whenever the car is moving at any real speed, which covers essentially all on-track use.";
+CM_ SG_ 512 Gear "0=Neutral, 1-6=gear, 255=unknown. See VAL_ table below.";
+CM_ BO_ 1024 "PDM system health: battery voltage, total output current (sum across all 30 channels), PDM's own internal temperature, a global error flag byte, and the PDM's internal logic rail voltage (confirmed real channel: MoTeC's own PDM15 DBC exposes this as 'IntRailVoltage' -- a sag here indicates a PDM internal power-supply problem, distinct from PDMBatteryVoltage which is the external supply). 20 Hz -- matches the PDM's confirmed native CAN broadcast rate. PDMGlobalErrorFlags is an opaque bitfield (nonzero = some fault present); exact per-bit assignments live in the PDM's own configuration (PDM Manager), not reproduced here since we don't have that mapping confirmed -- treat as a single pass/fail indicator, not individually decoded bits, unless/until the exact bit table is confirmed.";
+CM_ BO_ 1025 "Output currents 1-8 of 30, one byte each. 8-bit unsigned 0.1A/LSB (0-25.5A) deliberately mirrors MoTeC's own real PDM DBC field width (confirmed via a genuine PDM15 CAN-import screenshot) rather than this file's usual 16-bit -- with 30 channels x 2 (current+voltage), 16-bit fields would double the message count for resolution finer than a PDM output realistically needs. 20 Hz.";
+CM_ BO_ 1026 "Output currents 9-16 of 30 -- see BO_ 1025 (PD2) for the shared encoding rationale.";
+CM_ BO_ 1027 "Output currents 17-24 of 30 -- see BO_ 1025 (PD2) for the shared encoding rationale.";
+CM_ BO_ 1028 "Output currents 25-30 of 30 (only 6 channels remain, so DLC 6 not 8) -- see BO_ 1025 (PD2) for the shared encoding rationale.";
+CM_ BO_ 1029 "Output voltages 1-8 of 30, one byte each, 0.1V/LSB -- per-output voltage (as opposed to the shared PDMBatteryVoltage in PD1) catches per-channel wiring/connector voltage drop that a single battery-voltage reading can't. See BO_ 1025 (PD2) for the shared 8-bit encoding rationale.";
+CM_ BO_ 1030 "Output voltages 9-16 of 30 -- see BO_ 1029 (PD6).";
+CM_ BO_ 1031 "Output voltages 17-24 of 30 -- see BO_ 1029 (PD6).";
+CM_ BO_ 1032 "Output voltages 25-30 of 30 (DLC 6, only 6 channels remain) -- see BO_ 1029 (PD6).";
+CM_ BO_ 1033 "All 30 output on/off states, one per PDM output, packed as 30 individual 1-bit signals in a single 4-byte message (bits 0-29) -- matches MoTeC's own real PDM DBC pattern of packing many 1-bit flags into one frame rather than one message per bit (confirmed via a genuine PDM15 CAN-import screenshot). 1=output energised/closed, 0=off/open.";
+CM_ BO_ 1034 "All 16 PDM switch-input states, one per input, packed as 16 individual 1-bit signals in a single 2-byte message (bits 0-15) -- same packing rationale as BO_ 1033 (PD10). 1=input active/closed, 0=inactive/open (polarity depends on PDM Manager's per-input configuration).";
+CM_ BO_ 1035 "Input voltages 1-4 of 16, 16-bit unsigned 0.01V/LSB (finer than the output current/voltage channels -- these are diagnostic sensor-supply readings, not switched power channels, so the extra resolution is more useful here). Channel count (16) assumes one input-voltage channel per switch input; not independently confirmed for PDM30 specifically -- adjust if your unit differs.";
+CM_ BO_ 1036 "Input voltages 5-8 of 16 -- see BO_ 1035 (PD12).";
+CM_ BO_ 1037 "Input voltages 9-12 of 16 -- see BO_ 1035 (PD12).";
+CM_ BO_ 1038 "Input voltages 13-16 of 16 -- see BO_ 1035 (PD12).";
+CM_ BO_ 1039 "Output loads 1-8 of 30 -- percentage of rated output capacity (or PWM duty cycle for soft-start/dimmed outputs), distinct from OutputCurrent (an absolute measurement) and OutputVoltage (line voltage) -- confirmed as a real, separate channel category in MoTeC's own PDM15 DBC (its own 'OutputLoad' block, separate from 'OutputCurrent'/'OutputVoltage'), initially missed here and added once that was noticed. Same 8-bit/0.1A-style encoding rationale as BO_ 1025 (PD2), just scale 1 not 0.1 since load is already a 0-100 percentage.";
+CM_ BO_ 1040 "Output loads 9-16 of 30 -- see BO_ 1039 (PD16).";
+CM_ BO_ 1041 "Output loads 17-24 of 30 -- see BO_ 1039 (PD16).";
+CM_ BO_ 1042 "Output loads 25-30 of 30 (DLC 6, only 6 channels remain) -- see BO_ 1039 (PD16).";
+CM_ BO_ 1088 "M150 ECU channels beyond CD1-3/PE1-4's baseline: second lambda sensor (dual-bank/wideband redundancy), ignition timing (actual advance, not commanded), a second battery-voltage reading (measured at the ECU, distinct from PDMBatteryVoltage/DashBatteryVoltage -- see the CM_ BU_ C125 comment on why these stay separate), and barometric pressure (altitude/weather compensation input). 50 Hz, matching PE1's tier -- these are similarly real-time-relevant to tuning. Ranges (ignition -10..60deg, barometric 80..110kPa) are reasonable engineering defaults, not confirmed against a specific M150 configuration -- adjust to match your actual tune.";
+CM_ BO_ 1089 "Aggregate knock level and injector duty cycle, plus a single generic cam angle pair -- kept as simple aggregates for a quick dash readout even though EC6-EC9 below carry the full per-bank/per-cylinder breakdown from the real M1 channel list; both are legitimately useful (aggregate for glance-at-a-dash, granular for tuning/logging), not redundant to remove. 50 Hz, matching EC1/PE1's tier.";
+CM_ BO_ 1090 "M1 channel list (see CM_ BU_ M150): gearbox temperature, intake air temperature (distinct measurement point from ManifoldAirTemperature in PE2 -- IAT is typically pre-throttle/airbox, MAT is post-throttle in the manifold), general air temperature, and ambient air temperature. OPEN AMBIGUITY, flagged rather than silently guessed: the source document (AiM InfoTech MoTeC M1 guide) lists 'ECU AIR T' (AirTemperature) and 'ECU AMB T' (AmbientAirTemperature) as two distinct real M1 channels but doesn't describe how they differ from each other -- both are kept here since both are confirmed-real, but confirm the actual distinction against M1 Tune's own channel descriptions once you have hardware/software access, and update this comment. 10 Hz, matching PE2's tier for other slow-changing temps.";
+CM_ BO_ 1091 "M1 channel list: fuel temperature, engine coolant pressure (distinct from EngineCoolantTemperature in PE2), steering system pressure (relevant on hydraulic/DBW-assisted steering setups), and fuel injection pulse time (distinct from InjectorDutyCycle in EC2 -- this is the actual pulse width, not a duty-cycle percentage). 10 Hz.";
+CM_ BO_ 1092 "M1 channel list: boost pressure target vs actual (distinct from ManifoldAirPressure in PE1 -- MAP is total intake pressure, boost is specifically turbo/supercharger contribution above atmospheric), engine load average, and fuel composition (ethanol content percentage, relevant for flex-fuel tuning). 50 Hz, matching PE1's tier -- boost is as fast-changing as MAP.";
+CM_ BO_ 1093 "M1 channel list: per-bank intake/exhaust cam position (replaces the generic CamAngleIntake/Exhaust in EC2 with the real per-bank breakdown -- see that comment for why both are kept). Assumes dual-bank cam control (M150 supports it per its datasheet); single-bank engines will just see bank2 stay at its rest position. 50 Hz, matching EC1's tier.";
+CM_ BO_ 1094 "M1 channel list: commanded cam position targets (vs EC6's actual position -- the gap between the two is itself a useful diagnostic) and per-bank cam actuator duty cycle. 50 Hz.";
+CM_ BO_ 1095 "M1 channel list: per-cylinder knock level, up to 8 cylinders (see CM_ BU_ M150 on why 8 -- unused cylinders for smaller engines simply aren't transmitted). 50 Hz -- knock response needs to be fast.";
+CM_ BO_ 1096 "M1 channel list: per-cylinder ignition timing trim applied in response to knock (i.e. how many degrees of retard/advance each cylinder's timing was adjusted by) -- distinct from EC8's raw knock level, this is the ECU's corrective action, not the detected condition. 50 Hz, matching EC8's tier.";
+CM_ BO_ 1097 "M1 channel list: fuel/ignition output driver levels (diagnostic -- these reflect the ECU's own output stage, not a sensor reading), engine-running flag, ignition-cut request (shift-cut/rev-limit), launch control state, anti-lag state, and gear lever position (distinct from PE1's Gear -- lever position vs detected/engaged gear can disagree, e.g. during a shift). 20 Hz -- these are mostly discrete/state signals, not fast-changing analog values.";
+CM_ BO_ 1098 "M1 channel list: fuel level, ignition timing stage (which ignition table/map is active), and total engine running time. EngineRunTimeTotal is signed (@1-), not this file's usual unsigned-with-min-offset pattern -- same 32-bit MoTeC Dash Manager constraint as FuelUsedRaw in PE3, see that comment. 10 Hz -- these are all slow-changing.";
+CM_ BO_ 1099 "M1 channel list: warning flag bytes. Per the source document, WarningFlag1 encodes (as a value, not a bitmask): 1=ECT error, 2=ECP error, 3=RPM error, 4=OILT error, 5=OILP error, 7=CRANK error, 8=FUEP error (0 = no fault); WarningFlag2: 8=KNOCK error. Kept as opaque raw values matching the source spec exactly rather than reinterpreted, since we don't have visibility into what values 6 and 9+ might mean if MoTeC extends this list. 20 Hz.";
+CM_ BO_ 1120 "C125's own internal 3-axis G sensor -- separate signals from CD2's GForceLateral/Longitudinal (which represent a generic chassis-dynamics source, e.g. the ECU or a dedicated IMU) because this is specifically what the dash unit itself measures, plus it adds a vertical axis CD2 doesn't have. 100 Hz, matching CD2's rate for direct comparability.";
+CM_ BO_ 1121 "C125's own internal temperature, regulated sensor-supply rail voltage (a system-health diagnostic -- sags here indicate a wiring/loading problem upstream of every analog sensor on that rail), and battery voltage as measured at the dash. 10 Hz -- these are slow-changing relative to the G-sensor in DA1.";
+CM_ BO_ 1136 "L180's own internal 3-axis accelerometer (+/-5G, confirmed from the datasheet). Separate from CD2's and C125's G-force signals for the same reason as DA1 -- different physical sensor, different mounting location, legitimate to disagree slightly and worth logging independently. 100 Hz, matching CD2/DA1 for direct comparability.";
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 1000000;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+BA_ "GenMsgCycleTime" BO_ 256 10;
+BA_ "GenMsgCycleTime" BO_ 272 10;
+BA_ "GenMsgCycleTime" BO_ 288 10;
+BA_ "GenMsgCycleTime" BO_ 368 10;
+BA_ "GenMsgCycleTime" BO_ 369 10;
+BA_ "GenMsgCycleTime" BO_ 370 10;
+BA_ "GenMsgCycleTime" BO_ 371 10;
+BA_ "GenMsgCycleTime" BO_ 304 100;
+BA_ "GenMsgCycleTime" BO_ 320 100;
+BA_ "GenMsgCycleTime" BO_ 336 100;
+BA_ "GenMsgCycleTime" BO_ 352 100;
+BA_ "GenMsgCycleTime" BO_ 512 20;
+BA_ "GenMsgCycleTime" BO_ 528 100;
+BA_ "GenMsgCycleTime" BO_ 529 100;
+BA_ "GenMsgCycleTime" BO_ 544 200;
+BA_ "GenMsgCycleTime" BO_ 545 200;
+BA_ "GenMsgCycleTime" BO_ 768 100;
+BA_ "GenMsgCycleTime" BO_ 784 100;
+BA_ "GenMsgCycleTime" BO_ 1024 50;
+BA_ "GenMsgCycleTime" BO_ 1025 50;
+BA_ "GenMsgCycleTime" BO_ 1026 50;
+BA_ "GenMsgCycleTime" BO_ 1027 50;
+BA_ "GenMsgCycleTime" BO_ 1028 50;
+BA_ "GenMsgCycleTime" BO_ 1029 50;
+BA_ "GenMsgCycleTime" BO_ 1030 50;
+BA_ "GenMsgCycleTime" BO_ 1031 50;
+BA_ "GenMsgCycleTime" BO_ 1032 50;
+BA_ "GenMsgCycleTime" BO_ 1033 50;
+BA_ "GenMsgCycleTime" BO_ 1034 50;
+BA_ "GenMsgCycleTime" BO_ 1035 50;
+BA_ "GenMsgCycleTime" BO_ 1036 50;
+BA_ "GenMsgCycleTime" BO_ 1037 50;
+BA_ "GenMsgCycleTime" BO_ 1038 50;
+BA_ "GenMsgCycleTime" BO_ 1039 50;
+BA_ "GenMsgCycleTime" BO_ 1040 50;
+BA_ "GenMsgCycleTime" BO_ 1041 50;
+BA_ "GenMsgCycleTime" BO_ 1042 50;
+BA_ "GenMsgCycleTime" BO_ 1088 20;
+BA_ "GenMsgCycleTime" BO_ 1089 20;
+BA_ "GenMsgCycleTime" BO_ 1090 100;
+BA_ "GenMsgCycleTime" BO_ 1091 100;
+BA_ "GenMsgCycleTime" BO_ 1092 20;
+BA_ "GenMsgCycleTime" BO_ 1093 20;
+BA_ "GenMsgCycleTime" BO_ 1094 20;
+BA_ "GenMsgCycleTime" BO_ 1095 20;
+BA_ "GenMsgCycleTime" BO_ 1096 20;
+BA_ "GenMsgCycleTime" BO_ 1097 50;
+BA_ "GenMsgCycleTime" BO_ 1098 100;
+BA_ "GenMsgCycleTime" BO_ 1099 50;
+BA_ "GenMsgCycleTime" BO_ 1120 10;
+BA_ "GenMsgCycleTime" BO_ 1121 100;
+BA_ "GenMsgCycleTime" BO_ 1136 10;
+
+VAL_ 512 Gear 0 "Neutral" 1 "1st" 2 "2nd" 3 "3rd" 4 "4th" 5 "5th" 6 "6th" 255 "Unknown" ;

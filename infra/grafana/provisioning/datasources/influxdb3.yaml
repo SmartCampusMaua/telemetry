@@ -1,0 +1,24 @@
+# Provisions Grafana's official InfluxDB datasource in SQL mode against
+# influxdb3-core (see ../../../docker/docker-compose.yaml). InfluxDB 3's
+# query interface is SQL, not the InfluxQL/Flux this datasource type
+# defaults to -- jsonData.version: SQL is what switches it.
+#
+# ${INFLUXDB_TOKEN}/${INFLUXDB_DATABASE} are substituted from Grafana's own
+# process environment (populated by docker-compose's env_file: pointing at
+# the repo root .env) -- see docker-compose.yaml's grafana service comment
+# for the one-time admin-token bootstrap step this depends on.
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB3
+    type: influxdb
+    access: proxy
+    url: http://influxdb3-core:8181
+    isDefault: true
+    jsonData:
+      version: SQL
+      dbName: ${INFLUXDB_DATABASE}
+      httpMode: POST
+      insecureGrpc: true
+    secureJsonData:
+      token: ${INFLUXDB_TOKEN}

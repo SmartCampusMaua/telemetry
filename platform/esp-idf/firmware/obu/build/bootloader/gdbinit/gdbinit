@@ -1,0 +1,2 @@
+source /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader/gdbinit/symbols
+source /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader/gdbinit/connect

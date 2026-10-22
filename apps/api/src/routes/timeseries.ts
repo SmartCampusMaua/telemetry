@@ -131,7 +131,7 @@ function resolveResource(
 }
 
 const DEFAULT_LIMIT = 1000;
-const MAX_LIMIT = 10000;
+const MAX_LIMIT = 100000;
 const DEFAULT_INTERVAL_MINUTES = 1;
 
 // parquet's deliverable is a zip bundle of one .parquet file per UTC day (see queryExportBytes) —

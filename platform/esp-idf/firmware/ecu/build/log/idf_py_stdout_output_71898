@@ -1,0 +1,18 @@
+Command: ninja all
+[1/9] Performing build step for 'bootloader'
+[1/1] cd /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/bootloader && /Users/rogeriocassares/.espressif/python_env/idf6.0_py3.14_env/bin/python /Users/rogeriocassares/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/bootloader/bootloader.bin
+Bootloader binary size 0x5240 bytes. 0x2dc0 bytes (36%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Completed 'bootloader'
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+[5/9] Linking C static library esp-idf/main/libmain.a
+[6/9] Generating esp-idf/esp_system/ld/sections.ld
+[7/9] Linking CXX executable zc2x_ecu.elf
+[8/9] Generating binary image from built executable
+esptool v5.3.1
+Creating ESP32-S3 image...
+Merged 3 ELF sections.
+Successfully created ESP32-S3 image.
+Generated /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/zc2x_ecu.bin
+[9/9] cd /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build && /Users/rogeriocassares/.espressif/python_env/idf6.0_py3.14_env/bin/python /Users/rogeriocassares/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/partition_table/partition-table.bin /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/zc2x_ecu.bin
+zc2x_ecu.bin binary size 0x30790 bytes. Smallest app partition is 0x100000 bytes. 0xcf870 bytes (81%) free.

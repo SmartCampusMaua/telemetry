@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/CMakeFiles/bootloader"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/CMakeFiles/bootloader.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/CMakeFiles/bootloader-complete.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+		},
+		{
+			"file" : "/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/obu/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"bootloader"
+		],
+		"name" : "bootloader"
+	}
+}

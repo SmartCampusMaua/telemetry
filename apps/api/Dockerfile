@@ -47,15 +47,9 @@ COPY package.json .
 # re-reads this path every INFRA_CONFIG_REFRESH_SEC and fails fast at startup if nothing's
 # there, same as running locally with a missing infra.json.
 ENV INFRA_CONFIG_FILE=/etc/api/infra.json
-# sensors.json/devices.json/assets.json follow the exact same pattern, colocated in the same
-# /etc/api directory — src/sensors.ts's default (a relative ../parse-mqtt-to-influxdb3/*.json
-# path) only ever worked for a local checkout sitting next to this repo, never inside a
-# container. Unlike infra.json these hold no secrets, but they still live in the same mounted
-# directory (rather than their own volume) so the whole-directory-mount rule that makes
-# infra.json's hot-reload work applies to them too — see the Secret/subPath note above.
-ENV SENSORS_CONFIG_FILE=/etc/api/sensors.json
-ENV DEVICES_CONFIG_FILE=/etc/api/devices.json
-ENV ASSETS_CONFIG_FILE=/etc/api/assets.json
+# Device/asset/sensor/bus registry data comes from Postgres (DATABASE_URL, see
+# src/db/client.ts) now, not sensors.json/devices.json/assets.json — nothing to bake in or
+# mount for those anymore.
 USER bun
 EXPOSE 3333/tcp
 ENTRYPOINT ["bun", "run", "src/index.ts"]

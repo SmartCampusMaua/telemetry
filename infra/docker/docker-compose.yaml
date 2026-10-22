@@ -1,0 +1,276 @@
+# Full local stack: nats, InfluxDB3 + Grafana for storage/visualization, the input service (NATS
+# -> JetStream decode/dedup) and output service (JetStream -> InfluxDB3 write), the web dashboard,
+# and the telemetry services (mqtt/chirpstackv4 ingest + the registry api). Everything except the
+# third-party images (nats/influxdb/grafana) is built locally from source.
+#
+# Volumes below are pinned to their pre-existing names (docker_nats_data, docker_influxdb3_data,
+# etc.) rather than left to the default <project>_<name> auto-prefix — this stack used to run as
+# a separate "docker" compose project (infra/docker in a sibling zc2x checkout); pinning the exact
+# names means `docker compose up` here reuses that same data instead of creating empty volumes
+# under a new "telemetry_*" prefix. Don't rename these without migrating the data first
+# (`docker volume inspect <name>` to confirm what's actually in use before changing anything).
+#
+# Run from THIS directory:
+#   Subir:  docker compose up -d --build
+#   Parar:  docker compose down (dados ficam nos volumes)
+#   Zerar:  docker compose down -v (apaga os volumes -- cuidado!)
+#   Logs:   docker compose logs -f web input influxdb3-output mqtt chirpstackv4 api
+name: telemetry
+
+networks:
+  telemetry:
+    name: telemetry
+
+services:
+  nats:
+    image: nats:2.12.4-alpine3.22
+    container_name: nats
+    restart: unless-stopped
+    command: "-c /etc/nats/nats.conf"
+    ports:
+      - "4222:4222" # TCP client port
+      - "4223:4223" # WebSocket port (browser direct access)
+      - "8222:8222" # Monitoring port
+    env_file:
+      - ../../.env # Loads NATS_ACCOUNT_PUBKEY and NATS_INTERNAL_PASSWORD from repo root
+    volumes:
+      - nats_data:/data
+      - ../nats/nats.conf:/etc/nats/nats.conf:ro
+    networks:
+      - telemetry
+
+  # InfluxDB 3 Core: stores decoded telemetry written by services/output/influxdb3 (database
+  # "zc2x", table "telemetry" -- see that service's README) *and* sensor_data written by
+  # services/input/mqtt (database "iot_sensors") -- the same instance/token serves both
+  # pipelines now that they're on one network; see mqtt's infra.docker.json comment below. Auth
+  # is enabled -- INFLUXDB_TOKEN in .env is a real admin token, bootstrapped once with
+  #   docker compose exec influxdb3-core influxdb3 create token --admin
+  # --disable-authz=health exempts only the healthcheck endpoint below from that requirement
+  # (writes/queries still need the real token) -- otherwise docker-compose's own healthcheck
+  # can't authenticate: it runs inside this container via plain curl, and the compose file's
+  # ${INFLUXDB_TOKEN} substitution doesn't reach the repo-root .env (compose only auto-loads an
+  # .env next to this file, not two directories up).
+  influxdb3-core:
+    image: influxdb:3.10.3-core
+    container_name: influxdb3-core
+    restart: unless-stopped
+    command:
+      - influxdb3
+      - serve
+      - --node-id=zc2x-node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3
+      - --disable-authz=health
+    ports:
+      - "8181:8181" # HTTP API: writes (influxdb3-go client) + SQL queries (Grafana)
+    volumes:
+      - influxdb3_data:/var/lib/influxdb3
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8181/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - telemetry
+
+  # InfluxDB 3 Explorer: admin/query UI for the influxdb3-core instance above. Pre-wired to
+  # zc2x/telemetry via ../influxdb3-explorer/config.json (Explorer only supports this as a
+  # static file, not env vars -- checked against its docs). That file contains the real
+  # INFLUXDB_TOKEN in plain text, matching this project's existing local-dev convention of
+  # committing dev secrets in tracked files (see the repo root .env) rather than a separate
+  # untracked-secrets mechanism this project doesn't have yet. Rotate the token (and this file)
+  # before this ever leaves local dev.
+  #
+  # SESSION_SECRET_KEY (from .env) must stay stable across restarts: Explorer's SQLite session
+  # store (the "db" volume below) persists data encrypted with it, and a changed key makes that
+  # data undecryptable on the next start ("bad decrypt" — see .env's comment).
+  influxdb3-explorer:
+    image: influxdata/influxdb3-ui:1.9.0
+    container_name: influxdb3-explorer
+    restart: unless-stopped
+    depends_on:
+      influxdb3-core:
+        condition: service_healthy
+    command: ["--mode=admin"]
+    env_file:
+      - ../../.env
+    ports:
+      - "8888:8080"
+    volumes:
+      - ../influxdb3-explorer:/app-root/config:ro
+      - influxdb3_explorer_db:/db
+    networks:
+      - telemetry
+
+  # Grafana, provisioned with a datasource pointed at influxdb3-core's SQL query interface (see
+  # ../grafana/provisioning/datasources/influxdb3.yaml). GRAFANA_ADMIN_USER/PASSWORD and
+  # INFLUXDB_TOKEN come from the repo root .env via env_file below -- Grafana's provisioning YAML
+  # substitutes ${INFLUXDB_TOKEN}/${INFLUXDB_DATABASE} from its own process environment.
+  grafana:
+    image: grafana/grafana:13.0.3
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      influxdb3-core:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../../.env
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - telemetry
+
+  # JetStream (ZC2X_TELEMETRY) -> InfluxDB3 writer -- see ../../services/output/influxdb3. Runs
+  # continuously so telemetry actually lands in InfluxDB3 instead of only during a manual test
+  # run. NATS_URL/INFLUXDB_HOST are overridden here to the in-network service names; everything
+  # else (INFLUXDB_TOKEN/DATABASE/TABLE) comes from the repo root .env via env_file, same as
+  # grafana above.
+  influxdb3-output:
+    build:
+      context: ../../services/output/influxdb3
+    container_name: influxdb3-output
+    restart: unless-stopped
+    depends_on:
+      influxdb3-core:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    environment:
+      - NATS_URL=nats://nats:4222
+      - INFLUXDB_HOST=http://influxdb3-core:8181
+    env_file:
+      - ../../.env
+    networks:
+      - telemetry
+
+  # NATS Core (zc2x.can.*) -> JetStream decode/dedup/republish -- see ../../services/input/nats.
+  # This is what actually turns raw OBU/RSU packets into the zc2x.js.telemetry.> stream
+  # everything else (influxdb3-output above, web's live dashboard below) consumes; without it
+  # running, both of those sit idle with nothing to read. Every other env var
+  # (JETSTREAM_STREAM, NATS_DEDUP_WINDOW, etc.) has a sane default in cmd/main.go, so only
+  # NATS_URL needs overriding to the in-network name.
+  input:
+    build:
+      context: ../../services/input/nats
+    container_name: zc2x-input
+    restart: unless-stopped
+    depends_on:
+      nats:
+        condition: service_started
+    environment:
+      - NATS_URL=nats://nats:4222
+    networks:
+      - telemetry
+
+  # Live telemetry dashboard (apps/web/src/app/can2) -- reads zc2x.js.telemetry.> directly from
+  # the browser via NATS's WebSocket port (4223 above), not through this container, so
+  # NEXT_PUBLIC_NATS_URL has to resolve from wherever the browser actually runs (the host), not
+  # the Docker network -- ws://localhost:4223 works as long as nats's port mapping above is in
+  # place. It's a build arg, not runtime environment: Next.js inlines NEXT_PUBLIC_* into the
+  # client bundle at `next build` time (see apps/web/Dockerfile), so setting it only at container
+  # start would be too late. The ${...:-default} form means this works even without
+  # `--env-file ../../.env` (compose's build-arg substitution reads its own process environment,
+  # not env_file:, which only applies to the container's runtime env -- see influxdb3-explorer's
+  # comment above for the same caveat).
+  #
+  # Published on 3001, not 3000: grafana above already claims 3000 on the host.
+  web:
+    build:
+      context: ../../apps/web
+      args:
+        NEXT_PUBLIC_NATS_URL: ${NEXT_PUBLIC_NATS_URL:-ws://localhost:4223}
+    container_name: zc2x-web
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      nats:
+        condition: service_started
+    networks:
+      - telemetry
+
+  # MQTT -> decode -> InfluxDB3 (iot_sensors) -- see ../../services/input/mqtt. Build context is
+  # the monorepo root (not this service's own directory) because its Dockerfile COPYs sibling
+  # packages (go-config/go-data/go-parse) via the repo's go.work layout.
+  mqtt:
+    image: telemetry-services-input-mqtt
+    build:
+      context: ../..
+      dockerfile: services/input/mqtt/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      influxdb3-core:
+        condition: service_healthy
+    env_file:
+      - ../../.env
+    volumes:
+      # ../infra.docker.json: same shape as infra.example.json, but with influxdb.host set to
+      # http://influxdb3-core:8181 (the influxdb3-core service above, reached by its container
+      # name now that both are on the "telemetry" network) and registry.api_url set to
+      # http://api:3333 (the api service below, also on this network). influxdb.orgs[].token
+      # must be the *same* admin token as .env's INFLUXDB_TOKEN -- there's only one
+      # influxdb3-core instance now, shared with influxdb3-output/grafana above. Gitignored,
+      # create it locally. Mounted at the same path the Dockerfile bakes in via
+      # INFRA_CONFIG_FILE; the k8s manifest mounts the equivalent from a ConfigMap/Secret volume
+      # at that same path instead of setting any of these as env vars itself.
+      - ../infra.docker.json:/etc/mqtt/infra.json:ro
+    networks:
+      - telemetry
+
+  # ChirpStack v4 MQTT topic bridge -- see ../../services/bridge/chirpstackv4. Same build-context
+  # reasoning as mqtt above (COPYs the sibling go-config package).
+  chirpstackv4:
+    image: telemetry-services-bridge-chirpstackv4
+    build:
+      context: ../..
+      dockerfile: services/bridge/chirpstackv4/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    volumes:
+      # Same shared infra.docker.json as mqtt above -- this service only reads mqtt.* and
+      # registry.api_url out of it, ignoring influxdb.*.
+      - ../infra.docker.json:/etc/chirpstackv4/infra.json:ro
+    networks:
+      - telemetry
+
+  # Registry API (devices/assets/sensors/modbus-channels, now Postgres-backed -- see
+  # apps/api/src/db/schema.ts) + timeseries query API over InfluxDB3. apps/api is a standalone
+  # checkout that hasn't been folded into this monorepo's Go workspace, so its build context is
+  # its own directory, not the repo root. DATABASE_URL is overridden to host.docker.internal
+  # (not .env's "localhost", which only resolves from the host itself) to reach the
+  # smartcampus-postgres container, which belongs to a separate compose project (SmartCampusMaua/
+  # web) and isn't on this network.
+  api:
+    image: telemetry-apps-api
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - DATABASE_URL=postgres://iot:iot@host.docker.internal:5432/iot
+    ports:
+      - "3333:3333"
+    volumes:
+      # apps/api's own infra.json -- see apps/api/README.md's "Docker / Kubernetes" section.
+      # Gitignored; create it locally under apps/api/ before starting this service. Registry data
+      # (devices/assets/sensors/modbus-channels) comes from Postgres now (DATABASE_URL above),
+      # not sensors.json/devices.json/assets.json -- nothing else to mount for those anymore.
+      - ../../apps/api/infra.json:/etc/api/infra.json:ro
+    networks:
+      - telemetry
+
+volumes:
+  nats_data:
+    name: docker_nats_data
+  influxdb3_data:
+    name: docker_influxdb3_data
+  grafana_data:
+    name: docker_grafana_data
+  influxdb3_explorer_db:
+    name: docker_influxdb3_explorer_db

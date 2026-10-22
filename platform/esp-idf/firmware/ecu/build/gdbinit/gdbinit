@@ -1,0 +1,2 @@
+source /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/gdbinit/symbols
+source /Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/gdbinit/connect

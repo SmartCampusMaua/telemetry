@@ -1,0 +1,5 @@
+"-specs=/Users/rogeriocassares/Git/rogeriocassares/zc2x/platform/esp-idf/firmware/ecu/build/bootloader/specs/picolibc.specs"
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
