@@ -410,7 +410,7 @@ function renderAssets() {
 
   el("assets-body").querySelectorAll(".edit-asset-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      const id = e.target.closest("tr").dataset.asset_id;
+      const id = e.target.closest("tr").dataset.assetId;
       const a = assetsList.find((x) => x.id === id);
       el("asset-id").value = a.id;
       el("asset-name").value = a.asset_name;
@@ -424,7 +424,7 @@ function renderAssets() {
   el("assets-body").querySelectorAll(".attach-device-btn").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
       const row = e.target.closest("tr");
-      const asset_id = row.dataset.asset_id;
+      const asset_id = row.dataset.assetId;
       const device_id = row.querySelector(".attach-device-select").value;
       if (!device_id) return;
       try {
@@ -488,7 +488,7 @@ function renderDevices() {
 
   el("devices-body").querySelectorAll(".edit-device-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      const id = e.target.closest("tr").dataset.device_id;
+      const id = e.target.closest("tr").dataset.deviceId;
       const d = devicesList.find((x) => x.id === id);
       el("device-id").value = d.id;
       el("device-model").value = d.device_model;
@@ -559,7 +559,7 @@ function renderSensors() {
 
   el("sensors-body").querySelectorAll(".edit-sensor-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      const id = e.target.closest("tr").dataset.sensor_id;
+      const id = e.target.closest("tr").dataset.sensorId;
       const s = sensorsList.find((x) => x.id === id);
       el("sensor-id").value = s.id;
       el("sensor-type").value = s.sensor_type;
