@@ -104,7 +104,7 @@ export const registry = new Elysia()
         asset_name: t.String(),
         asset_slug: t.String(),
         asset_coords: t.Optional(t.Unknown()),
-        parent_asset_id: t.Optional(t.String()),
+        parent_asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
   )
@@ -146,7 +146,7 @@ export const registry = new Elysia()
         asset_name: t.Optional(t.String()),
         asset_slug: t.Optional(t.String()),
         asset_coords: t.Optional(t.Unknown()),
-        parent_asset_id: t.Optional(t.String()),
+        parent_asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
   )
@@ -193,10 +193,10 @@ export const registry = new Elysia()
       body: t.Object({
         device_model: t.String(),
         device_type: t.String(),
-        serial_number: t.Optional(t.String()),
-        dev_eui: t.Optional(t.String()),
-        mac_address: t.Optional(t.String()),
-        asset_id: t.Optional(t.String()),
+        serial_number: t.Optional(t.Nullable(t.String())),
+        dev_eui: t.Optional(t.Nullable(t.String())),
+        mac_address: t.Optional(t.Nullable(t.String())),
+        asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
   )
@@ -235,9 +235,9 @@ export const registry = new Elysia()
       body: t.Object({
         device_model: t.Optional(t.String()),
         device_type: t.Optional(t.String()),
-        serial_number: t.Optional(t.String()),
-        dev_eui: t.Optional(t.String()),
-        mac_address: t.Optional(t.String()),
+        serial_number: t.Optional(t.Nullable(t.String())),
+        dev_eui: t.Optional(t.Nullable(t.String())),
+        mac_address: t.Optional(t.Nullable(t.String())),
         allow: t.Optional(t.Boolean()),
         asset_id: t.Optional(t.Nullable(t.String())),
       }),
@@ -282,11 +282,11 @@ export const registry = new Elysia()
       body: t.Object({
         sensor_type: t.String(),
         device_id: t.String(),
-        device_index: t.Optional(t.Number()),
-        sensor_name: t.Optional(t.String()),
+        device_index: t.Optional(t.Nullable(t.Number())),
+        sensor_name: t.Optional(t.Nullable(t.String())),
         // Override only — leave unset to inherit the sensor's device's own asset. See
         // src/db/schema.ts's comment on sensors.asset_id for the bus-listening-device rationale.
-        asset_id: t.Optional(t.String()),
+        asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
   )
@@ -319,8 +319,8 @@ export const registry = new Elysia()
       body: t.Object({
         sensor_type: t.Optional(t.String()),
         device_id: t.Optional(t.String()),
-        device_index: t.Optional(t.Number()),
-        sensor_name: t.Optional(t.String()),
+        device_index: t.Optional(t.Nullable(t.Number())),
+        sensor_name: t.Optional(t.Nullable(t.String())),
         // Explicit null clears the override (back to inheriting the device's asset) — distinct
         // from omitting the field entirely, which leaves whatever was already set untouched.
         asset_id: t.Optional(t.Nullable(t.String())),
