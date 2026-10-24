@@ -252,6 +252,56 @@ type SensorTypes struct {
 	// ── Occupancy / illuminance presence sensor (VS370) ────────────────────
 	OccupancyStatus   string // occupancy_status    bool: false=vacant true=occupied
 	IlluminanceStatus string // illuminance_status  raw enum: 0=dim 1=bright 254=disable
+
+	// ── Indoor air quality (AM103, AM308) ─────────────────────────────────
+	// Temperature/humidity/battery reuse AirTemp/AirRH/BatteryLevel (same
+	// wire format as EM300-DI's built-in sensor); pressure reuses AirPress
+	// (same hPa reading NIT21LI-EMW104 reports). CO2/PM2.5/PM10 are a direct
+	// device-computed concentration, no "_raw" suffix needed.
+	CO2   string // co2        ppm (AM103, AM308)
+	PM2_5 string // pm2_5      µg/m³ (AM308)
+	PM10  string // pm10       µg/m³ (AM308)
+	// PIRStatus is a bare motion trigger (idle/trigger), deliberately not
+	// OccupancyStatus (VS370) — that's a sustained presence algorithm, this
+	// is an instantaneous PIR interrupt; different sensing concept, not
+	// interchangeable.
+	PIRStatus string // pir_status  bool: false=idle true=trigger (AM308)
+	// IlluminanceRaw is the same ambient-light concept as Illuminance
+	// (NIT21LI-EMW104) but uncalibrated — a 0-255 reading with no lux
+	// conversion published by Milesight, same "_raw" reasoning as
+	// SoilMoistureRaw/SoilMoisture.
+	IlluminanceRaw string // illuminance_raw (AM308)
+	// AM308 reports TVOC in one of two mutually exclusive wire formats
+	// (firmware-configured, never both on the same device) — an IAQ index
+	// and a real µg/m³ mass concentration. These are different physical
+	// quantities, not two resolutions of the same one, so they get distinct
+	// sensor_types rather than being merged.
+	TVOCIndex string // tvoc_index  unitless IAQ index (AM308)
+	TVOC      string // tvoc        µg/m³ (AM308)
+
+	// ── People counting (VS121, VS135) ────────────────────────────────────
+	// VS121 has a single counting line (unindexed); VS135 has up to 4
+	// (DeviceIndex = line number, 1-indexed — same convention as
+	// SoilMoistureRaw's probe depths). "_child" variants (VS135 only) are a
+	// separate child-height sub-count reported alongside the main line
+	// count, not a replacement for it.
+	PeopleLineIn       string // people_line_in        period count since last uplink
+	PeopleLineOut      string // people_line_out        period count since last uplink
+	PeopleLineTotalIn  string // people_line_total_in   cumulative since last device reset
+	PeopleLineTotalOut string // people_line_total_out  cumulative since last device reset
+
+	PeopleLineInChild       string // people_line_in_child
+	PeopleLineOutChild      string // people_line_out_child
+	PeopleLineTotalInChild  string // people_line_total_in_child
+	PeopleLineTotalOutChild string // people_line_total_out_child
+
+	// PeopleCount is VS121's current aggregate occupancy across every
+	// region — the one single-value byte in an otherwise per-region TLV
+	// (region_count/region_mask, both skipped: this decoder does not break
+	// out per-region detail). PeopleCountMax is the max simultaneous count
+	// observed in the reporting interval.
+	PeopleCount    string // people_count
+	PeopleCountMax string // people_count_max
 }
 
 var ST = SensorTypes{
@@ -317,6 +367,17 @@ var ST = SensorTypes{
 	WaterPressure: "water_pressure", PressureSensorFailStatus: "pressure_sensor_fail_status",
 	// VS370 occupancy/illuminance presence sensor
 	OccupancyStatus: "occupancy_status", IlluminanceStatus: "illuminance_status",
+	// AM103/AM308 indoor air quality
+	CO2: "co2", PM2_5: "pm2_5", PM10: "pm10",
+	PIRStatus: "pir_status", IlluminanceRaw: "illuminance_raw",
+	TVOCIndex: "tvoc_index", TVOC: "tvoc",
+	// VS121/VS135 people counting
+	PeopleLineIn: "people_line_in", PeopleLineOut: "people_line_out",
+	PeopleLineTotalIn: "people_line_total_in", PeopleLineTotalOut: "people_line_total_out",
+	PeopleLineInChild: "people_line_in_child", PeopleLineOutChild: "people_line_out_child",
+	PeopleLineTotalInChild:  "people_line_total_in_child",
+	PeopleLineTotalOutChild: "people_line_total_out_child",
+	PeopleCount:             "people_count", PeopleCountMax: "people_count_max",
 }
 
 // AllSensorTypes returns every canonical sensor_type value defined on ST, for

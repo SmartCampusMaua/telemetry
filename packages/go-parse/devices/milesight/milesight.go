@@ -33,23 +33,46 @@ var genericTypeLengths = map[byte]int{
 	// attributes (skip, no sensor_data written)
 	0x01: 1, 0x08: 6, 0x09: 2, 0x0A: 2, 0x0B: 1,
 	0x0F: 1, 0x10: 1, 0x16: 8, 0x1B: 5, 0xFE: 1, 0xFF: 2,
+
+	// AM103/AM308: co2, tvoc_index, pm2_5, pm10 all share this type byte at
+	// 2 bytes regardless of channel — channel alone disambiguates which one.
+	0x7D: 2,
+	0x73: 2, // AM308 pressure: uint16 LE ÷10, hPa
+	0xCB: 1, // AM308 light_level: uint8, no lux conversion published
+	0xE6: 2, // AM308 tvoc (µg/m³ variant): uint16 LE direct
+
+	// VS121/VS135 people counting. Region/dwell/flow-matrix/alarm channels
+	// (0xC9, 0xD5, 0xDA, 0xE3, 0xE4, 0xFC) are registered so tokenization
+	// doesn't break on them, but intentionally not decoded into
+	// sensor_data — see decodeVS121/decodeVS135's doc comments for why.
+	0xCC: 4, // people_line_in+out, or _total_in+out: two uint16 LE
+	0xCD: 1, // VS121 people_count_max: uint8
+	0xC9: 4, // VS121 people_count+region_count+region_mask — skipped past byte 0
+	0xD5: 8, // VS121 region_N_count ×8 — skipped (region array)
+	0xDA: 8, // VS121 flow matrix (A-to-A..D) — skipped (not decoded)
+	0x85: 4, // VS121 device-side timestamp — skipped (redundant with record.Timestamp)
+	0xF7: 4, // VS121 line_in/line_out (undocumented 2nd pair) — skipped
+	0xD2: 4, // VS135 people_line_total_in/out (per line, incl. _child): uint32 LE
+	0xE3: 4, // VS135 region_N_count ×4 — skipped (region array)
+	0xE4: 5, // VS121/VS135 region dwell time (avg/max) — skipped (region array)
+	0xFC: 3, // VS135 occlusion alarm — skipped (out of scope for now)
 }
 
 // channelTypeOverride maps (channel, type) pairs that differ from the generic table.
 //
 // NOTE: channel 0x20 type 0xCE ("history") is intentionally only registered
-// once, for EM500-SWL below — EM500-SMTC (10B), VS373 (9B), AT101 (12B), and
-// UC511 (9B, coincidentally the same length as VS373 but a different shape)
-// all use the same (channel, type) pair with different, mutually-incompatible
-// lengths. ParseMilesightTLV has no model context (it runs before the model
-// is looked up), so this is not a benign omission: if any of those four
-// ever sends a 0x20/0xCE TLV, it will be mis-consumed as EM500-SWL's 6
-// bytes, corrupting the parse of whatever follows it in that uplink — not a
-// clean "unknown channel, stop." History/backfill records are out of scope
-// today (not written to sensor_data by any decoder in this package) — this
-// entry cannot be safely extended to a second length without first passing
-// model context into ParseMilesightTLV. Do not add another entry for that
-// pair without doing so.
+// once, for EM500-SWL below — EM500-SMTC (10B), VS373 (9B), AT101 (12B),
+// UC511 (9B, coincidentally the same length as VS373 but a different shape),
+// AM103 (9B), AM308 (20B), VS121, and VS135 all use the same (channel, type)
+// pair with different, mutually-incompatible lengths. ParseMilesightTLV has
+// no model context (it runs before the model is looked up), so this is not
+// a benign omission: if any of those ever sends a 0x20/0xCE TLV, it will be
+// mis-consumed as EM500-SWL's 6 bytes, corrupting the parse of whatever
+// follows it in that uplink — not a clean "unknown channel, stop."
+// History/backfill records are out of scope today (not written to
+// sensor_data by any decoder in this package) — this entry cannot be safely
+// extended to a second length without first passing model context into
+// ParseMilesightTLV. Do not add another entry for that pair without doing so.
 var channelTypeOverride = map[[2]byte]int{
 	{0x05, 0xE1}: 8, // water-conv: water_conv(2B)+pulse_conv(2B)+water(4B f32 LE)
 	{0x85, 0x00}: 2, // gpio alarm: gpio(1B)+alarm(1B)
@@ -104,6 +127,10 @@ var modelDecoders = map[string]modelDecoder{
 	"AT101":       decodeAT101,
 	"UC511":       decodeUC511,
 	"VS370":       decodeVS370,
+	"AM103":       decodeAM103,
+	"AM308":       decodeAM308,
+	"VS121":       decodeVS121,
+	"VS135":       decodeVS135,
 }
 
 // ParseMilesightTLV tokenizes a Milesight binary uplink into channel/type/data entries.

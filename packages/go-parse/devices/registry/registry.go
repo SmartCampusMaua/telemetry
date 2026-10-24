@@ -81,6 +81,18 @@ var lnsParsers = map[string]lnsParser{
 	"VS370": func(model, submodel string, payload []byte, deviceID, provider string, port uint64, ts time.Time) []record.SensorDataRecord {
 		return milesight.Decode(model, submodel, payload, deviceID, provider, ts)
 	},
+	"AM103": func(model, submodel string, payload []byte, deviceID, provider string, port uint64, ts time.Time) []record.SensorDataRecord {
+		return milesight.Decode(model, submodel, payload, deviceID, provider, ts)
+	},
+	"AM308": func(model, submodel string, payload []byte, deviceID, provider string, port uint64, ts time.Time) []record.SensorDataRecord {
+		return milesight.Decode(model, submodel, payload, deviceID, provider, ts)
+	},
+	"VS121": func(model, submodel string, payload []byte, deviceID, provider string, port uint64, ts time.Time) []record.SensorDataRecord {
+		return milesight.Decode(model, submodel, payload, deviceID, provider, ts)
+	},
+	"VS135": func(model, submodel string, payload []byte, deviceID, provider string, port uint64, ts time.Time) []record.SensorDataRecord {
+		return milesight.Decode(model, submodel, payload, deviceID, provider, ts)
+	},
 }
 
 func modelKey(model, submodel string) string {

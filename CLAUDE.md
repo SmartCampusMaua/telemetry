@@ -77,6 +77,10 @@ go-parse/devices/
 | `em300_di.go`       | `"EM300_DI"`       | `"EM300_DI"`       | `deviceModel=EM300, deviceSubmodel=DI`       |
 | `em500_swl.go`      | `"EM500_SWL"`      | `"EM500_SWL"`      | `deviceModel=EM500, deviceSubmodel=SWL`      |
 | `ws101.go`          | `"WS101"`          | `"WS101"`          | `deviceModel=WS101`                          |
+| `am103.go`          | `"AM103"`          | `"AM103"`          | `deviceModel=AM103`                          |
+| `am308.go`          | `"AM308"`          | `"AM308"`          | `deviceModel=AM308`                          |
+| `vs121.go`          | `"VS121"`          | `"VS121"`          | `deviceModel=VS121`                          |
+| `vs135.go`          | `"VS135"`          | `"VS135"`          | `deviceModel=VS135`                          |
 
 ## InfluxDB3 tag schema
 
