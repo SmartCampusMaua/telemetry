@@ -64,12 +64,16 @@ COPY --from=builder /etc/group /etc/group
 
 COPY --from=builder /go/bin/chirpstackv4 /go/bin/chirpstackv4
 
-# infra.json (MQTT broker creds + registry API URL) is not baked into the
-# image — same resolution as the other Go services here: INFRA_CONFIG_FILE
-# defaults to the relative path "infra.json", resolved against the
-# container's working directory, and must be supplied at runtime (bind
-# mount / k8s Secret volume). Override via the INFRA_CONFIG_FILE env var.
-
 USER appuser:appuser
+
+# infra.json (MQTT broker creds + registry API URL) is NOT baked into the
+# image — same pattern as services/input/mqtt's Dockerfile: a fixed,
+# well-known absolute path baked in via ENV below, with the actual file
+# supplied at runtime (a volume mount — see infra/docker/docker-compose.yaml,
+# or a k8s ConfigMap/Secret volume). A Kubernetes manifest should never set
+# this env var itself, only mount the volume at this path — and that volume
+# must be mounted as a whole directory, never subPath, which never updates
+# in place on a ConfigMap/Secret change.
+ENV INFRA_CONFIG_FILE=/etc/chirpstackv4/infra.json
 
 ENTRYPOINT ["/go/bin/chirpstackv4"]
