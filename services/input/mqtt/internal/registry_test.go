@@ -151,8 +151,8 @@ const (
 
 func TestGetSensorsMap_LoadsAndValidates(t *testing.T) {
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`"},
-		{"id": "`+testSensorID2+`", "sensor_type": "battery_level", "device_id": "`+testDeviceIDUC300+`"}
+		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`", "allow": true},
+		{"id": "`+testSensorID2+`", "sensor_type": "battery_level", "device_id": "`+testDeviceIDUC300+`", "allow": true}
 	]`)
 
 	sensorMap, err := GetSensorsMap(apiURL)
@@ -170,7 +170,7 @@ func TestGetSensorsMap_LoadsAndValidates(t *testing.T) {
 
 func TestGetSensorsMap_RejectsUnknownSensorType(t *testing.T) {
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "not_a_real_sensor_type", "device_id": "`+testDeviceIDUC300+`"}
+		{"id": "`+testSensorID1+`", "sensor_type": "not_a_real_sensor_type", "device_id": "`+testDeviceIDUC300+`", "allow": true}
 	]`)
 
 	if _, err := GetSensorsMap(apiURL); err == nil {
@@ -182,8 +182,8 @@ func TestGetSensorsMap_AllowsSameSensorTypeTwiceOnOneDeviceViaDeviceIndex(t *tes
 	// Two identical probes on one device — same sensor_type, distinct
 	// sensor_id, disambiguated by device_index.
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 1},
-		{"id": "`+testSensorID2+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 2}
+		{"id": "`+testSensorID1+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 1, "allow": true},
+		{"id": "`+testSensorID2+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 2, "allow": true}
 	]`)
 
 	sensorMap, err := GetSensorsMap(apiURL)
@@ -203,8 +203,8 @@ func TestGetSensorsMap_RejectsDuplicateDeviceIndexTuple(t *testing.T) {
 	// two different sensor ids — a genuine config error, not legitimate
 	// multi-instance disambiguation.
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`"},
-		{"id": "`+testSensorID2+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`"}
+		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`", "allow": true},
+		{"id": "`+testSensorID2+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`", "allow": true}
 	]`)
 
 	if _, err := GetSensorsMap(apiURL); err == nil {
@@ -214,7 +214,7 @@ func TestGetSensorsMap_RejectsDuplicateDeviceIndexTuple(t *testing.T) {
 
 func TestGetSensorsMap_LoadsSensorNameAndAssetOverride(t *testing.T) {
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 1, "sensor_name": "Depth 10cm", "asset_id": "019df4d6-f351-77a5-a3c2-926523251c47"}
+		{"id": "`+testSensorID1+`", "sensor_type": "soil_moisture_raw", "device_id": "`+testDeviceIDUC300+`", "device_index": 1, "sensor_name": "Depth 10cm", "asset_id": "019df4d6-f351-77a5-a3c2-926523251c47", "allow": true}
 	]`)
 
 	sensorMap, err := GetSensorsMap(apiURL)
@@ -232,8 +232,8 @@ func TestGetSensorsMap_LoadsSensorNameAndAssetOverride(t *testing.T) {
 
 func TestGetSensorsMap_RejectsDuplicateSensorID(t *testing.T) {
 	apiURL := newRegistryTestServer(t, `[
-		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`"},
-		{"id": "`+testSensorID1+`", "sensor_type": "battery_level", "device_id": "`+testDeviceIDUC300+`"}
+		{"id": "`+testSensorID1+`", "sensor_type": "water_level", "device_id": "`+testDeviceIDUC300+`", "allow": true},
+		{"id": "`+testSensorID1+`", "sensor_type": "battery_level", "device_id": "`+testDeviceIDUC300+`", "allow": true}
 	]`)
 
 	if _, err := GetSensorsMap(apiURL); err == nil {

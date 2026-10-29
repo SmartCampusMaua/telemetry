@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/SmartCampusMaua/telemetry/packages/go-config"
-	"github.com/SmartCampusMaua/telemetry/services/bridge/chirpstackv4/internal"
+	chirpstackv4 "github.com/SmartCampusMaua/telemetry/services/bridge/chirpstackv4/internal"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 )

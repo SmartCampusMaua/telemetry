@@ -50,6 +50,23 @@ function requireWriteToken(headers: Record<string, string | undefined>, set: { s
 
 const idParam = t.Object({ id: t.String() });
 
+// Coordinates reuse this project's own existing convention: packages/go-parse's AT101 asset
+// tracker decoder already writes sensor_type "latitude"/"longitude" (record.go) — full words,
+// not Google Maps JS SDK's internal lat/lng shorthand or GIS's abbreviated "lon". altitude
+// follows the same full-word style for consistency. Stored in assets.asset_coords (jsonb,
+// previously unused/undefined shape) rather than new columns — no migration needed.
+const coordsSchema = t.Object({
+  latitude: t.Number(),
+  longitude: t.Number(),
+  altitude: t.Optional(t.Nullable(t.Number())),
+});
+
+// 23503 = foreign_key_violation on DELETE means other rows still reference this one — a
+// real, user-correctable state (detach/delete the dependents first), not a 500.
+function deleteFkError(entity: string, dependents: string): { error: string } {
+  return { error: `cannot delete this ${entity}: ${dependents} still reference it` };
+}
+
 export const registry = new Elysia()
   // ── assets ──────────────────────────────────────────────────────────────────────────────
   .get("/api/registry/v0.1/assets", () => db.select().from(assets))
@@ -103,7 +120,7 @@ export const registry = new Elysia()
       body: t.Object({
         asset_name: t.String(),
         asset_slug: t.String(),
-        asset_coords: t.Optional(t.Unknown()),
+        asset_coords: t.Optional(t.Nullable(coordsSchema)),
         parent_asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
@@ -145,10 +162,32 @@ export const registry = new Elysia()
       body: t.Object({
         asset_name: t.Optional(t.String()),
         asset_slug: t.Optional(t.String()),
-        asset_coords: t.Optional(t.Unknown()),
+        asset_coords: t.Optional(t.Nullable(coordsSchema)),
         parent_asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
+  )
+  .delete(
+    "/api/registry/v0.1/assets/:id",
+    async ({ params, headers, set }) => {
+      const authError = requireWriteToken(headers, set);
+      if (authError) return authError;
+      try {
+        const [row] = await db.delete(assets).where(eq(assets.id, params.id)).returning({ id: assets.id });
+        if (!row) {
+          set.status = 404;
+          return { error: "asset not found" };
+        }
+        return row;
+      } catch (err) {
+        if (pgErrorCode(err) === "23503") {
+          set.status = 409;
+          return deleteFkError("asset", "devices, sensors, or child assets");
+        }
+        throw err;
+      }
+    },
+    { params: idParam }
   )
 
   // ── devices ─────────────────────────────────────────────────────────────────────────────
@@ -243,6 +282,23 @@ export const registry = new Elysia()
       }),
     }
   )
+  // Cascades to this device's sensors and device_buses (and so modbus_channels) —
+  // schema.ts's ON DELETE CASCADE, confirmed deliberately acceptable: these are config
+  // rows, not historical telemetry, and InfluxDB3 itself is untouched either way.
+  .delete(
+    "/api/registry/v0.1/devices/:id",
+    async ({ params, headers, set }) => {
+      const authError = requireWriteToken(headers, set);
+      if (authError) return authError;
+      const [row] = await db.delete(devices).where(eq(devices.id, params.id)).returning({ id: devices.id });
+      if (!row) {
+        set.status = 404;
+        return { error: "device not found" };
+      }
+      return row;
+    },
+    { params: idParam }
+  )
 
   // ── sensors ─────────────────────────────────────────────────────────────────────────────
   .get("/api/registry/v0.1/sensors", () => db.select().from(sensors))
@@ -284,6 +340,10 @@ export const registry = new Elysia()
         device_id: t.String(),
         device_index: t.Optional(t.Nullable(t.Number())),
         sensor_name: t.Optional(t.Nullable(t.String())),
+        // Mirrors devices.allow — services/input/mqtt's GetSensorsMap skips !allow rows the same
+        // way it already skips !allow devices, so this actually drops the sensor from decode-time
+        // resolution, not just a display flag. Defaults true at the DB level if omitted.
+        allow: t.Optional(t.Boolean()),
         // Override only — leave unset to inherit the sensor's device's own asset. See
         // src/db/schema.ts's comment on sensors.asset_id for the bus-listening-device rationale.
         asset_id: t.Optional(t.Nullable(t.String())),
@@ -321,11 +381,28 @@ export const registry = new Elysia()
         device_id: t.Optional(t.String()),
         device_index: t.Optional(t.Nullable(t.Number())),
         sensor_name: t.Optional(t.Nullable(t.String())),
+        allow: t.Optional(t.Boolean()),
         // Explicit null clears the override (back to inheriting the device's asset) — distinct
         // from omitting the field entirely, which leaves whatever was already set untouched.
         asset_id: t.Optional(t.Nullable(t.String())),
       }),
     }
+  )
+  // Cascades to this sensor's modbus_channel mapping, if any — same reasoning as the
+  // device DELETE above.
+  .delete(
+    "/api/registry/v0.1/sensors/:id",
+    async ({ params, headers, set }) => {
+      const authError = requireWriteToken(headers, set);
+      if (authError) return authError;
+      const [row] = await db.delete(sensors).where(eq(sensors.id, params.id)).returning({ id: sensors.id });
+      if (!row) {
+        set.status = 404;
+        return { error: "sensor not found" };
+      }
+      return row;
+    },
+    { params: idParam }
   )
 
   // ── modbus channels ─────────────────────────────────────────────────────────────────────
@@ -424,4 +501,18 @@ export const registry = new Elysia()
         modbus_slave_id: t.Optional(t.Number()),
       }),
     }
+  )
+  .delete(
+    "/api/registry/v0.1/modbus-channels/:id",
+    async ({ params, headers, set }) => {
+      const authError = requireWriteToken(headers, set);
+      if (authError) return authError;
+      const [row] = await db.delete(modbusChannels).where(eq(modbusChannels.id, params.id)).returning({ id: modbusChannels.id });
+      if (!row) {
+        set.status = 404;
+        return { error: "modbus channel not found" };
+      }
+      return row;
+    },
+    { params: idParam }
   );

@@ -89,6 +89,24 @@
     font-size: 0.8rem;
   }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.danger-text:not(:disabled) { color: var(--error-fg); border-color: var(--error-fg); }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    flex: none;
+  }
+  .icon-btn:hover { color: var(--fg); border-color: var(--fg); }
+  .icon-btn.danger:hover { color: var(--error-fg); border-color: var(--error-fg); }
+  .row-actions { display: flex; gap: 0.35rem; white-space: nowrap; }
   .tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
   .tabs button { background: transparent; color: var(--fg); border: 1px solid var(--border); font-weight: 500; }
   .tabs button.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
@@ -109,6 +127,11 @@
   #status .msg.ok { background: var(--ok-bg); color: var(--ok-fg); }
   #status:empty { display: none; }
   .hidden { display: none !important; }
+  .filter-row { margin-bottom: 0.75rem; }
+  .filter-row input, .filter-row select { max-width: 320px; }
+  tr.hidden-by-search { display: none; }
+  .sensor-checklist { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0 0 1rem; padding: 0.75rem; background: var(--field); border-radius: 8px; }
+  .sensor-checklist label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; color: var(--fg); }
   footer { margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
   footer a { color: inherit; }
 </style>
@@ -122,7 +145,7 @@
     <legend>Write token</legend>
     <div class="row">
       <div class="field">
-        <label for="token">Bearer token (required for create/edit — reads work without it)</label>
+        <label for="token">Bearer token (required for create/edit/delete — reads work without it)</label>
         <input type="password" id="token" placeholder="paste your REGISTRY_WRITE_TOKEN here" />
       </div>
       <button class="secondary" id="saveToken" type="button">Save</button>
@@ -159,13 +182,36 @@
         </div>
       </div>
       <div class="row">
+        <div class="field narrow">
+          <label for="asset-lat">Latitude</label>
+          <input type="number" id="asset-lat" step="any" placeholder="-23.600000" />
+        </div>
+        <div class="field narrow">
+          <label for="asset-lng">Longitude</label>
+          <input type="number" id="asset-lng" step="any" placeholder="-46.550000" />
+        </div>
+        <div class="field narrow">
+          <label for="asset-alt">Altitude (m, optional)</label>
+          <input type="number" id="asset-alt" step="any" placeholder="760" />
+        </div>
+      </div>
+      <p class="note">Latitude/longitude set together or not at all — leave both blank if this asset's location isn't known yet. Field names match this project's existing convention (packages/go-parse's AT101 decoder already writes <code>latitude</code>/<code>longitude</code> sensor readings) rather than Google Maps JS SDK's internal <code>lat</code>/<code>lng</code> shorthand.</p>
+      <div class="row">
         <button type="submit" id="asset-submit">Create asset</button>
         <button type="button" class="secondary" id="asset-cancel">Cancel edit</button>
       </div>
     </form>
     <h2 style="margin-top:1.5rem">Existing assets</h2>
+    <div class="row filter-row">
+      <div class="field narrow">
+        <label for="assets-filter">Filter</label>
+        <input type="text" id="assets-filter" placeholder="asset_id, name, slug, or an attached device's id/model/eui/mac/serial…" />
+      </div>
+      <button type="button" class="secondary danger-text" id="assets-delete-selected" disabled>Delete selected</button>
+      <span class="muted" id="assets-selected-count"></span>
+    </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Slug</th><th>Parent</th><th>Devices attached</th><th>Attach device</th><th></th></tr></thead>
+      <thead><tr><th><input type="checkbox" id="assets-select-all" title="Select all"/></th><th>Name</th><th>Slug</th><th>Parent</th><th>Location</th><th>Devices attached</th><th>Attach device</th><th></th></tr></thead>
       <tbody id="assets-body"></tbody>
     </table></div>
   </section>
@@ -190,11 +236,11 @@
         </div>
       </div>
       <div class="row">
-        <div class="field">
+        <div class="field" id="device-eui-field">
           <label for="device-eui">Dev EUI (LoRaWAN)</label>
           <input type="text" id="device-eui" />
         </div>
-        <div class="field">
+        <div class="field" id="device-mac-field">
           <label for="device-mac">MAC address (IP)</label>
           <input type="text" id="device-mac" />
         </div>
@@ -203,14 +249,28 @@
           <select id="device-asset"><option value="">— none —</option></select>
         </div>
       </div>
+      <div id="device-sensor-checklist" class="sensor-checklist hidden"></div>
+      <div id="device-existing-sensors" class="sensor-checklist hidden"></div>
       <div class="row">
         <button type="submit" id="device-submit">Create device</button>
         <button type="button" class="secondary" id="device-cancel">Cancel edit</button>
       </div>
     </form>
     <h2 style="margin-top:1.5rem">Existing devices</h2>
+    <div class="row filter-row">
+      <div class="field narrow">
+        <label for="devices-filter">Filter</label>
+        <input type="text" id="devices-filter" placeholder="device_id, asset_id, model, dev_eui, mac, serial…" />
+      </div>
+      <div class="field narrow">
+        <label for="devices-type-filter">Type</label>
+        <select id="devices-type-filter"><option value="">all</option><option value="lorawan">lorawan</option><option value="ip">ip</option></select>
+      </div>
+      <button type="button" class="secondary danger-text" id="devices-delete-selected" disabled>Delete selected</button>
+      <span class="muted" id="devices-selected-count"></span>
+    </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Model</th><th>Type</th><th>Identity</th><th>Asset</th><th></th></tr></thead>
+      <thead><tr><th><input type="checkbox" id="devices-select-all" title="Select all"/></th><th>Model</th><th>Type</th><th>Identity</th><th>Asset</th><th></th></tr></thead>
       <tbody id="devices-body"></tbody>
     </table></div>
   </section>
@@ -251,8 +311,16 @@
       </div>
     </form>
     <h2 style="margin-top:1.5rem">Existing sensors</h2>
+    <div class="row filter-row">
+      <div class="field narrow">
+        <label for="sensors-filter">Filter</label>
+        <input type="text" id="sensors-filter" placeholder="sensor_id, device_id, asset_id, type, name, dev_eui, mac, serial…" />
+      </div>
+      <button type="button" class="secondary danger-text" id="sensors-delete-selected" disabled>Delete selected</button>
+      <span class="muted" id="sensors-selected-count"></span>
+    </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Type</th><th>Name</th><th>Device</th><th>Asset override</th><th></th></tr></thead>
+      <thead><tr><th><input type="checkbox" id="sensors-select-all" title="Select all"/></th><th>Type</th><th>Name</th><th>Device</th><th>Asset override</th><th></th></tr></thead>
       <tbody id="sensors-body"></tbody>
     </table></div>
   </section>
@@ -296,13 +364,21 @@
       </div>
     </form>
     <h2 style="margin-top:1.5rem">Existing channel mappings</h2>
+    <div class="row filter-row">
+      <div class="field narrow">
+        <label for="channels-filter">Filter</label>
+        <input type="text" id="channels-filter" placeholder="channel_id, device_id, sensor_id, model, eui/mac, serial, bus type…" />
+      </div>
+      <button type="button" class="secondary danger-text" id="channels-delete-selected" disabled>Delete selected</button>
+      <span class="muted" id="channels-selected-count"></span>
+    </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Device</th><th>Bus</th><th>Channel</th><th>Slave</th><th>Sensor</th><th></th></tr></thead>
+      <thead><tr><th><input type="checkbox" id="channels-select-all" title="Select all"/></th><th>Device</th><th>Bus</th><th>Channel</th><th>Slave</th><th>Sensor</th><th></th></tr></thead>
       <tbody id="channels-body"></tbody>
     </table></div>
   </section>
 
-  <footer>Reads (lists above) work without a token. Creating or editing anything requires the write token above — see README.md's "Registry (Postgres)" section for the full design.</footer>
+  <footer>Reads (lists above) work without a token. Creating, editing, or deleting anything requires the write token above — see README.md's "Registry (Postgres)" section for the full design.</footer>
 </main>
 
 <script>
@@ -315,6 +391,38 @@ let assetsList = [], devicesList = [], sensorsList = [], channelsList = [];
 const el = (id) => document.getElementById(id);
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+
+// Inline SVG, stroke=currentColor so they pick up --fg/--muted automatically in both themes —
+// no icon font/external request needed, matching this page's dependency-free philosophy.
+const ICON_EDIT = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+const ICON_DELETE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>`;
+const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+function actionCell(idAttr, id, extra) {
+  return `<td class="row-actions">
+    <button type="button" class="icon-btn copy-id-btn" data-id="${id}" title="Copy ID (${id})">${ICON_COPY}</button>
+    ${extra || ""}
+    <button type="button" class="icon-btn edit-${idAttr}-btn" title="Edit">${ICON_EDIT}</button>
+    <button type="button" class="icon-btn danger delete-${idAttr}-btn" title="Delete">${ICON_DELETE}</button>
+  </td>`;
+}
+
+function wireCopyButtons(container) {
+  container.querySelectorAll(".copy-id-btn").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(btn.dataset.id);
+        const original = btn.innerHTML;
+        btn.innerHTML = ICON_CHECK;
+        setTimeout(() => { btn.innerHTML = original; }, 1200);
+      } catch {
+        showStatus("Could not copy to clipboard — check browser permissions.", "error");
+      }
+    });
+  });
 }
 
 function showStatus(message, kind) {
@@ -331,6 +439,69 @@ async function apiFetch(path, options = {}) {
   return body;
 }
 
+async function deleteRow(path, id, confirmMsg) {
+  if (!confirm(confirmMsg)) return;
+  try {
+    await apiFetch(`${path}/${id}`, { method: "DELETE" });
+    showStatus("Deleted.", "ok");
+    await loadAll();
+  } catch (err) {
+    showStatus(String(err.message || err), "error");
+  }
+}
+
+// ── bulk (checkbox) selection + group delete ───────────────────────────────────────────
+// One wiring per table, done once at load (the tbody element itself persists across
+// re-renders — only its innerHTML is replaced), so listeners stay attached. The per-render
+// functions below call the returned `resetSelection` to clear stale checked state after
+// rebuilding rows, since fresh <tr> markup is always unchecked.
+function wireBulkDelete({ bodyId, selectAllId, deleteBtnId, countId, path, noun }) {
+  const body = el(bodyId);
+  const selectAll = el(selectAllId);
+  const deleteBtn = el(deleteBtnId);
+  const countEl = el(countId);
+
+  function selectedIds() {
+    return [...body.querySelectorAll(".row-select:checked")].map((cb) => cb.value);
+  }
+  function updateState() {
+    const n = selectedIds().length;
+    countEl.textContent = n ? `${n} selected` : "";
+    deleteBtn.disabled = n === 0;
+  }
+  body.addEventListener("change", (e) => {
+    if (e.target.classList.contains("row-select")) updateState();
+  });
+  selectAll.addEventListener("change", () => {
+    for (const cb of body.querySelectorAll("tr:not(.hidden-by-search) .row-select")) cb.checked = selectAll.checked;
+    updateState();
+  });
+  deleteBtn.addEventListener("click", async () => {
+    const ids = selectedIds();
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} selected ${noun}(s)? This cannot be undone.`)) return;
+    let ok = 0, fail = 0;
+    for (const id of ids) {
+      try {
+        await apiFetch(`${path}/${id}`, { method: "DELETE" });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    showStatus(`Deleted ${ok} ${noun}(s).${fail ? ` ${fail} failed — likely still referenced by other rows.` : ""}`, fail ? "error" : "ok");
+    await loadAll();
+  });
+  return () => {
+    selectAll.checked = false;
+    updateState();
+  };
+}
+const resetAssetsSelection = wireBulkDelete({ bodyId: "assets-body", selectAllId: "assets-select-all", deleteBtnId: "assets-delete-selected", countId: "assets-selected-count", path: "/assets", noun: "asset" });
+const resetDevicesSelection = wireBulkDelete({ bodyId: "devices-body", selectAllId: "devices-select-all", deleteBtnId: "devices-delete-selected", countId: "devices-selected-count", path: "/devices", noun: "device" });
+const resetSensorsSelection = wireBulkDelete({ bodyId: "sensors-body", selectAllId: "sensors-select-all", deleteBtnId: "sensors-delete-selected", countId: "sensors-selected-count", path: "/sensors", noun: "sensor" });
+const resetChannelsSelection = wireBulkDelete({ bodyId: "channels-body", selectAllId: "channels-select-all", deleteBtnId: "channels-delete-selected", countId: "channels-selected-count", path: "/modbus-channels", noun: "channel mapping" });
+
 // ── tabs ──────────────────────────────────────────────────────────────────────────────
 for (const btn of document.querySelectorAll(".tabs button")) {
   btn.addEventListener("click", () => {
@@ -346,6 +517,143 @@ el("saveToken").addEventListener("click", () => {
   sessionStorage.setItem(TOKEN_KEY, token);
   showStatus("Token saved for this tab.", "ok");
 });
+
+// ── built-in sensors catalog ──────────────────────────────────────────────────────────
+// Devices whose decoder (packages/go-parse) emits a fixed, hardware-determined set of
+// sensor_types — verified against each decoder file, not guessed. Deliberately excludes
+// UC100/UC300/UC501 (and any other Modbus-routed device): those carry ModbusChannel/
+// IOChannel instead of a fixed SensorType, so their sensors are genuinely site-wiring-
+// dependent and must stay manual, same as a fully custom device.
+//
+// `i` = device_index (lnv3_sm3dl's 3 depth probes and lnv3_svc's 3 valves are hardware-
+// fixed counts, in the product itself — not site config, safe to auto-create outright).
+// `exclusive` marks mutually-exclusive wire-format variants (AM308's two TVOC formats,
+// firmware-configured, never both on one device) — both default UNCHECKED so creating a
+// device never silently picks the wrong one; the operator ticks whichever one this
+// specific unit's firmware actually reports.
+// `defaultChecked:false` marks optional lines on a multi-line device (VS135) where only
+// line 1 is guaranteed to exist — lines 2-4 are shown but unchecked until confirmed wired.
+const KS3000_TYPES = [
+  "voltage_u_ll_avg", "current_i_avg", "frequency", "power_p_total", "power_q_total", "power_factor",
+  "energy_a_plus", "energy_q_plus", "energy_a_minus", "energy_q_minus", "error_code",
+  "voltage_u1", "voltage_u2", "voltage_u3", "voltage_u12", "voltage_u23", "voltage_u31",
+  "current_in", "current_i1", "current_i2", "current_i3",
+  "power_p1", "power_p2", "power_p3", "power_q1", "power_q2", "power_q3",
+  "power_s_total", "power_s1", "power_s2", "power_s3",
+  "power_factor1", "power_factor2", "power_factor3", "energy_s_total", "horimetre",
+].map((t) => ({ t }));
+
+function vs373RegionTypes() {
+  const out = [];
+  for (let i = 1; i <= 6; i++) out.push({ t: `region${i}_occupancy` });
+  for (let i = 1; i <= 6; i++) out.push({ t: `region${i}_out_of_bed_time` });
+  return out;
+}
+
+function vs135LineTypes() {
+  const out = [];
+  for (let line = 1; line <= 4; line++) {
+    for (const t of ["people_line_in", "people_line_out", "people_line_total_in", "people_line_total_out"]) {
+      out.push({ t, i: line, defaultChecked: line === 1 });
+    }
+  }
+  return out;
+}
+
+const BUILT_IN_SENSORS = {
+  dtl200: ["battery_level", "current_loop", "voltage_input", "water_level"].map((t) => ({ t })),
+  nit21li_emw104: [
+    "internal_temp", "internal_rh", "air_temp", "air_rh", "wind_speed", "wind_gust", "wind_dir",
+    "rain_depth", "solar_rad", "illuminance", "uv_index", "air_press", "external_power",
+    "env_sensor_fail_status", "internal_battery_voltage", "c1_state", "c1_count", "c2_state", "c2_count",
+  ].map((t) => ({ t })),
+  ks3000_lora: KS3000_TYPES,
+  ks3000_wifi: KS3000_TYPES,
+  em300_di: ["air_temp", "air_rh", "battery_level", "pulse_state", "pulse_count"].map((t) => ({ t })),
+  em500_swl: ["battery_level", "water_level"].map((t) => ({ t })),
+  em500_smtc: ["battery_level", "electrical_conductivity", "soil_moisture", "soil_temp", "soil_temp_alarm", "temperature_mutation"].map((t) => ({ t })),
+  ws101: ["battery_level", "press_type"].map((t) => ({ t })),
+  ws101_sos: ["battery_level", "press_type"].map((t) => ({ t })),
+  ws101_scene: ["battery_level", "press_type"].map((t) => ({ t })),
+  vs370: ["battery_level", "illuminance_status", "occupancy_status"].map((t) => ({ t })),
+  vs373: [
+    { t: "detection_status" }, { t: "target_status" }, { t: "use_time_now" }, { t: "use_time_today" },
+    ...vs373RegionTypes(),
+    { t: "respiratory_status" }, { t: "respiratory_rate" },
+    { t: "alarm_id" }, { t: "alarm_type" }, { t: "alarm_status" }, { t: "alarm_region_id" },
+  ],
+  at101: ["air_temp", "air_temp_alarm", "battery_level", "device_position", "geofence_status", "latitude", "longitude", "motion_status", "tamper_status"].map((t) => ({ t })),
+  uc511: ["battery_level", "solenoid_valve_status", "pulse_count", "digital_input", "water_pressure", "pressure_sensor_fail_status"].map((t) => ({ t })),
+  lnv3_sm3dl: [{ t: "board_voltage" }, { t: "soil_moisture_raw", i: 1 }, { t: "soil_moisture_raw", i: 2 }, { t: "soil_moisture_raw", i: 3 }],
+  lnv3_svc: [{ t: "board_voltage" }, { t: "pulse_count" }, { t: "solenoid_valve_raw", i: 1 }, { t: "solenoid_valve_raw", i: 2 }, { t: "solenoid_valve_raw", i: 3 }],
+  am103: ["battery_level", "air_temp", "air_rh", "co2"].map((t) => ({ t })),
+  am308: [
+    { t: "battery_level" }, { t: "air_temp" }, { t: "air_rh" }, { t: "pir_status" }, { t: "illuminance_raw" },
+    { t: "co2" }, { t: "air_press" }, { t: "pm2_5" }, { t: "pm10" },
+    { t: "tvoc_index", exclusive: true }, { t: "tvoc", exclusive: true },
+  ],
+  vs121: ["people_count", "people_count_max", "people_line_in", "people_line_out", "people_line_total_in", "people_line_total_out"].map((t) => ({ t })),
+  vs135: vs135LineTypes(),
+};
+
+function builtInSensorsFor(model) {
+  return BUILT_IN_SENSORS[(model || "").trim().toLowerCase()] || null;
+}
+
+function renderSensorChecklist() {
+  const container = el("device-sensor-checklist");
+  const isEditing = !!el("device-id").value;
+  const list = !isEditing ? builtInSensorsFor(el("device-model").value) : null;
+  if (!list) {
+    container.innerHTML = "";
+    container.classList.add("hidden");
+    return;
+  }
+  container.classList.remove("hidden");
+  container.innerHTML =
+    `<div class="note" style="width:100%;margin:0 0 0.4rem">Built-in sensors for this model — uncheck anything not actually wired/active on this specific unit (created automatically alongside the device):</div>` +
+    list
+      .map((s, idx) => {
+        const checked = s.exclusive ? false : s.defaultChecked !== false;
+        const label = s.i ? `${s.t} (index ${s.i})` : s.t;
+        return `<label><input type="checkbox" class="builtin-sensor-check" data-idx="${idx}" ${checked ? "checked" : ""}/> ${escapeHtml(label)}</label>`;
+      })
+      .join("");
+}
+el("device-model").addEventListener("input", renderSensorChecklist);
+
+// dev_eui only applies to LoRaWAN devices, mac_address only to IP ones — showing both on
+// every device invited mixing them up, so the form only shows whichever one this device's
+// type can actually have.
+function updateDeviceIdentityFieldVisibility() {
+  const type = el("device-type").value;
+  el("device-eui-field").classList.toggle("hidden", type !== "lorawan");
+  el("device-mac-field").classList.toggle("hidden", type !== "ip");
+}
+el("device-type").addEventListener("change", updateDeviceIdentityFieldVisibility);
+updateDeviceIdentityFieldVisibility();
+
+// Existing sensors on the device being edited — checkbox mirrors sensors.allow, so toggling
+// it off deactivates decode-time resolution (services/input/mqtt's GetSensorsMap) without
+// deleting the row. Only shown while editing; creation uses the built-in checklist above.
+function renderExistingSensorsChecklist(deviceId) {
+  const container = el("device-existing-sensors");
+  const sensors = sensorsList.filter((s) => s.device_id === deviceId);
+  if (!sensors.length) {
+    container.innerHTML = "";
+    container.classList.add("hidden");
+    return;
+  }
+  container.classList.remove("hidden");
+  container.innerHTML =
+    `<div class="note" style="width:100%;margin:0 0 0.4rem">This device's sensors — uncheck to deactivate (keeps the row, stops decode-time resolution):</div>` +
+    sensors
+      .map((s) => {
+        const label = s.sensor_name || s.sensor_type;
+        return `<label><input type="checkbox" class="existing-sensor-allow-check" data-sensor-id="${s.id}" ${s.allow ? "checked" : ""}/> ${escapeHtml(label)}${s.device_index != null ? ` (index ${s.device_index})` : ""}</label>`;
+      })
+      .join("");
+}
 
 // ── load everything ───────────────────────────────────────────────────────────────────
 async function loadAll() {
@@ -380,6 +688,12 @@ function populateDropdowns() {
 }
 
 // ── assets ────────────────────────────────────────────────────────────────────────────
+function formatCoords(coords) {
+  if (!coords || typeof coords.latitude !== "number" || typeof coords.longitude !== "number") return '<span class="muted">—</span>';
+  const base = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
+  return typeof coords.altitude === "number" ? `${base} (${coords.altitude}m)` : base;
+}
+
 function renderAssets() {
   const byId = new Map(assetsList.map((a) => [a.id, a]));
   el("assets-body").innerHTML = assetsList
@@ -390,11 +704,19 @@ function renderAssets() {
         .filter((d) => d.asset_id !== a.id)
         .map((d) => `<option value="${d.id}">${escapeHtml(d.device_model)} · ${escapeHtml(d.dev_eui || d.mac_address || d.id.slice(0, 8))}</option>`)
         .join("");
+      // Haystack: this asset's own id/name/slug, plus every attached device's id/model/
+      // eui/mac/serial — "find the asset this dev_eui lives on" is as valid a lookup as
+      // "find this asset by name".
+      const haystack = `${a.id} ${a.asset_name} ${a.asset_slug} ${attached
+        .map((d) => `${d.id} ${d.device_model} ${d.dev_eui || ""} ${d.mac_address || ""} ${d.serial_number || ""}`)
+        .join(" ")}`.toLowerCase();
       return `
-      <tr data-asset-id="${a.id}">
+      <tr data-asset-id="${a.id}" data-haystack="${escapeHtml(haystack)}">
+        <td><input type="checkbox" class="row-select" value="${a.id}"/></td>
         <td>${escapeHtml(a.asset_name)}</td>
         <td class="mono">${escapeHtml(a.asset_slug)}</td>
         <td>${parent ? escapeHtml(parent.asset_name) : '<span class="muted">—</span>'}</td>
+        <td class="mono">${formatCoords(a.asset_coords)}</td>
         <td>${attached.length ? attached.map((d) => escapeHtml(d.device_model)).join(", ") : '<span class="muted">none</span>'}</td>
         <td>
           <select class="attach-device-select" style="min-width:140px">
@@ -403,10 +725,12 @@ function renderAssets() {
           </select>
           <button type="button" class="secondary attach-device-btn">Attach</button>
         </td>
-        <td><button type="button" class="secondary edit-asset-btn">Edit</button></td>
+        ${actionCell("asset", a.id)}
       </tr>`;
     })
     .join("");
+  filterAssetsTable();
+  resetAssetsSelection();
 
   el("assets-body").querySelectorAll(".edit-asset-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
@@ -416,9 +740,19 @@ function renderAssets() {
       el("asset-name").value = a.asset_name;
       el("asset-slug").value = a.asset_slug;
       el("asset-parent").value = a.parent_asset_id || "";
+      el("asset-lat").value = a.asset_coords?.latitude ?? "";
+      el("asset-lng").value = a.asset_coords?.longitude ?? "";
+      el("asset-alt").value = a.asset_coords?.altitude ?? "";
       el("asset-submit").textContent = "Save changes";
       document.querySelector('.tabs button[data-tab="assets"]').click();
       window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+  el("assets-body").querySelectorAll(".delete-asset-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.closest("tr").dataset.assetId;
+      const a = assetsList.find((x) => x.id === id);
+      deleteRow("/assets", id, `Delete asset "${a?.asset_name ?? id}"? This cannot be undone.`);
     });
   });
   el("assets-body").querySelectorAll(".attach-device-btn").forEach((btn) => {
@@ -436,7 +770,15 @@ function renderAssets() {
       }
     });
   });
+  wireCopyButtons(el("assets-body"));
 }
+function filterAssetsTable() {
+  const q = el("assets-filter").value.trim().toLowerCase();
+  for (const row of el("assets-body").querySelectorAll("tr")) {
+    row.classList.toggle("hidden-by-search", !(!q || row.dataset.haystack.includes(q)));
+  }
+}
+el("assets-filter").addEventListener("input", filterAssetsTable);
 
 el("asset-cancel").addEventListener("click", () => resetAssetForm());
 function resetAssetForm() {
@@ -449,10 +791,15 @@ el("form-asset").addEventListener("submit", async (e) => {
   e.preventDefault();
   clearStatus();
   const id = el("asset-id").value;
+  const lat = el("asset-lat").value.trim();
+  const lng = el("asset-lng").value.trim();
+  const alt = el("asset-alt").value.trim();
+  const asset_coords = lat !== "" && lng !== "" ? { latitude: Number(lat), longitude: Number(lng), ...(alt !== "" ? { altitude: Number(alt) } : {}) } : null;
   const body = {
     asset_name: el("asset-name").value.trim(),
     asset_slug: el("asset-slug").value.trim(),
     parent_asset_id: el("asset-parent").value || null,
+    asset_coords,
   };
   try {
     if (id) {
@@ -475,13 +822,17 @@ function renderDevices() {
   el("devices-body").innerHTML = devicesList
     .map((d) => {
       const asset = d.asset_id ? assetById.get(d.asset_id) : undefined;
+      const haystack = `${d.id} ${d.device_model} ${d.dev_eui || ""} ${d.mac_address || ""} ${d.serial_number || ""} ${d.asset_id || ""} ${
+        asset?.asset_name || ""
+      } ${asset?.asset_slug || ""}`.toLowerCase();
       return `
-      <tr data-device-id="${d.id}">
+      <tr data-device-id="${d.id}" data-device-type="${escapeHtml(d.device_type)}" data-haystack="${escapeHtml(haystack)}">
+        <td><input type="checkbox" class="row-select" value="${d.id}"/></td>
         <td>${escapeHtml(d.device_model)}</td>
         <td>${escapeHtml(d.device_type)}</td>
         <td class="mono">${escapeHtml(d.dev_eui || d.mac_address || "—")}</td>
         <td>${asset ? escapeHtml(asset.asset_name) : '<span class="muted">none</span>'}</td>
-        <td><button type="button" class="secondary edit-device-btn">Edit</button></td>
+        ${actionCell("device", d.id)}
       </tr>`;
     })
     .join("");
@@ -498,25 +849,54 @@ function renderDevices() {
       el("device-mac").value = d.mac_address || "";
       el("device-asset").value = d.asset_id || "";
       el("device-submit").textContent = "Save changes";
+      updateDeviceIdentityFieldVisibility();
+      renderSensorChecklist(); // editing: always hides the built-in (create-only) checklist
+      renderExistingSensorsChecklist(d.id);
       document.querySelector('.tabs button[data-tab="devices"]').click();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
+  el("devices-body").querySelectorAll(".delete-device-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.closest("tr").dataset.deviceId;
+      const d = devicesList.find((x) => x.id === id);
+      deleteRow("/devices", id, `Delete device "${d?.device_model ?? id}" (${d?.dev_eui || d?.mac_address || id})? This cannot be undone.`);
+    });
+  });
+  wireCopyButtons(el("devices-body"));
+  filterDevicesTable();
+  resetDevicesSelection();
 }
+function filterDevicesTable() {
+  const q = el("devices-filter").value.trim().toLowerCase();
+  const typeFilter = el("devices-type-filter").value;
+  for (const row of el("devices-body").querySelectorAll("tr")) {
+    const matchesType = !typeFilter || row.dataset.deviceType === typeFilter;
+    const matchesText = !q || row.dataset.haystack.includes(q);
+    row.classList.toggle("hidden-by-search", !(matchesType && matchesText));
+  }
+}
+el("devices-filter").addEventListener("input", filterDevicesTable);
+el("devices-type-filter").addEventListener("change", filterDevicesTable);
 
 el("device-cancel").addEventListener("click", () => resetDeviceForm());
 function resetDeviceForm() {
   el("form-device").reset();
   el("device-id").value = "";
   el("device-submit").textContent = "Create device";
+  updateDeviceIdentityFieldVisibility();
+  renderSensorChecklist();
+  el("device-existing-sensors").innerHTML = "";
+  el("device-existing-sensors").classList.add("hidden");
 }
 
 el("form-device").addEventListener("submit", async (e) => {
   e.preventDefault();
   clearStatus();
   const id = el("device-id").value;
+  const model = el("device-model").value.trim();
   const body = {
-    device_model: el("device-model").value.trim(),
+    device_model: model,
     device_type: el("device-type").value,
     serial_number: el("device-serial").value.trim() || null,
     dev_eui: el("device-eui").value.trim() || null,
@@ -526,10 +906,57 @@ el("form-device").addEventListener("submit", async (e) => {
   try {
     if (id) {
       await apiFetch(`/devices/${id}`, { method: "PATCH", body: JSON.stringify(body) });
-      showStatus("Device updated.", "ok");
+
+      // Sync any active/inactive toggles on this device's existing sensors — only PATCH
+      // the ones actually changed from their loaded state.
+      const checks = [...document.querySelectorAll(".existing-sensor-allow-check")];
+      let changedCount = 0, failedCount = 0;
+      for (const cb of checks) {
+        const sensorId = cb.dataset.sensorId;
+        const original = sensorsList.find((s) => s.id === sensorId);
+        if (!original || original.allow === cb.checked) continue;
+        try {
+          await apiFetch(`/sensors/${sensorId}`, { method: "PATCH", body: JSON.stringify({ allow: cb.checked }) });
+          changedCount++;
+        } catch {
+          failedCount++;
+        }
+      }
+      showStatus(
+        `Device updated.${changedCount ? ` ${changedCount} sensor(s) updated.` : ""}${failedCount ? ` ${failedCount} sensor update(s) failed.` : ""}`,
+        "ok"
+      );
     } else {
-      await apiFetch("/devices", { method: "POST", body: JSON.stringify(body) });
-      showStatus("Device created.", "ok");
+      const created = await apiFetch("/devices", { method: "POST", body: JSON.stringify(body) });
+
+      // Built-in sensors (see BUILT_IN_SENSORS above) — only on create, and only the
+      // checked ones. Best-effort: one failure doesn't block the others or the device
+      // itself, which already exists at this point.
+      const builtIns = builtInSensorsFor(model);
+      let createdCount = 0, failedCount = 0;
+      if (builtIns) {
+        const checks = [...document.querySelectorAll(".builtin-sensor-check")];
+        for (const cb of checks) {
+          if (!cb.checked) continue;
+          const s = builtIns[Number(cb.dataset.idx)];
+          try {
+            await apiFetch("/sensors", {
+              method: "POST",
+              body: JSON.stringify({ sensor_type: s.t, device_id: created.id, device_index: s.i ?? null }),
+            });
+            createdCount++;
+          } catch {
+            failedCount++;
+          }
+        }
+      }
+      showStatus(
+        `Device created.${createdCount ? ` ${createdCount} built-in sensor(s) created.` : ""}${failedCount ? ` ${failedCount} sensor(s) failed — check Sensors tab.` : ""}`,
+        "ok"
+      );
+      resetDeviceForm();
+      await loadAll();
+      return;
     }
     resetDeviceForm();
     await loadAll();
@@ -546,13 +973,18 @@ function renderSensors() {
     .map((s) => {
       const device = deviceById.get(s.device_id);
       const assetOverride = s.asset_id ? assetById.get(s.asset_id) : undefined;
+      const effectiveAssetId = s.asset_id || device?.asset_id || "";
+      const haystack = `${s.id} ${s.sensor_type} ${s.sensor_name || ""} ${s.device_id} ${device?.device_model || ""} ${
+        device?.dev_eui || ""
+      } ${device?.mac_address || ""} ${device?.serial_number || ""} ${effectiveAssetId} ${assetOverride?.asset_name || ""}`.toLowerCase();
       return `
-      <tr data-sensor-id="${s.id}">
+      <tr data-sensor-id="${s.id}" data-haystack="${escapeHtml(haystack)}">
+        <td><input type="checkbox" class="row-select" value="${s.id}"/></td>
         <td>${escapeHtml(s.sensor_type)}</td>
         <td>${escapeHtml(s.sensor_name || "—")}</td>
         <td>${device ? escapeHtml(device.device_model) : '<span class="muted">unknown</span>'}</td>
         <td>${assetOverride ? escapeHtml(assetOverride.asset_name) : '<span class="muted">inherits device</span>'}</td>
-        <td><button type="button" class="secondary edit-sensor-btn">Edit</button></td>
+        ${actionCell("sensor", s.id)}
       </tr>`;
     })
     .join("");
@@ -572,7 +1004,24 @@ function renderSensors() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
+  el("sensors-body").querySelectorAll(".delete-sensor-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.closest("tr").dataset.sensorId;
+      const s = sensorsList.find((x) => x.id === id);
+      deleteRow("/sensors", id, `Delete sensor "${s?.sensor_name || s?.sensor_type || id}"? This cannot be undone.`);
+    });
+  });
+  wireCopyButtons(el("sensors-body"));
+  filterSensorsTable();
+  resetSensorsSelection();
 }
+function filterSensorsTable() {
+  const q = el("sensors-filter").value.trim().toLowerCase();
+  for (const row of el("sensors-body").querySelectorAll("tr")) {
+    row.classList.toggle("hidden-by-search", !(!q || row.dataset.haystack.includes(q)));
+  }
+}
+el("sensors-filter").addEventListener("input", filterSensorsTable);
 
 el("sensor-cancel").addEventListener("click", () => resetSensorForm());
 function resetSensorForm() {
@@ -615,14 +1064,18 @@ function renderChannels() {
     .map((c) => {
       const device = deviceById.get(c.device_id);
       const sensor = sensorById.get(c.sensor_id);
+      const haystack = `${c.id} ${c.bus_type} ${c.device_id} ${device?.device_model || ""} ${device?.dev_eui || ""} ${
+        device?.mac_address || ""
+      } ${device?.serial_number || ""} ${c.sensor_id} ${sensor?.sensor_type || ""} ${sensor?.sensor_name || ""}`.toLowerCase();
       return `
-      <tr data-channel-id="${c.id}">
+      <tr data-channel-id="${c.id}" data-haystack="${escapeHtml(haystack)}">
+        <td><input type="checkbox" class="row-select" value="${c.id}"/></td>
         <td>${device ? escapeHtml(device.device_model) : '<span class="muted">unknown</span>'}</td>
         <td class="mono">${escapeHtml(c.bus_type)}</td>
         <td>${c.modbus_channel}</td>
         <td>${c.modbus_slave_id}</td>
         <td>${sensor ? escapeHtml(sensor.sensor_name || sensor.sensor_type) : '<span class="muted">unknown</span>'}</td>
-        <td><button type="button" class="secondary edit-channel-btn">Edit</button></td>
+        ${actionCell("channel", c.id)}
       </tr>`;
     })
     .join("");
@@ -642,7 +1095,23 @@ function renderChannels() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
+  el("channels-body").querySelectorAll(".delete-channel-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.closest("tr").dataset.channelId;
+      deleteRow("/modbus-channels", id, "Delete this Modbus channel mapping? This cannot be undone.");
+    });
+  });
+  wireCopyButtons(el("channels-body"));
+  filterChannelsTable();
+  resetChannelsSelection();
 }
+function filterChannelsTable() {
+  const q = el("channels-filter").value.trim().toLowerCase();
+  for (const row of el("channels-body").querySelectorAll("tr")) {
+    row.classList.toggle("hidden-by-search", !(!q || row.dataset.haystack.includes(q)));
+  }
+}
+el("channels-filter").addEventListener("input", filterChannelsTable);
 
 el("channel-cancel").addEventListener("click", () => resetChannelForm());
 function resetChannelForm() {

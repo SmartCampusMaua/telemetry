@@ -280,6 +280,8 @@ type apiSensor struct {
 	DeviceID    string `json:"device_id"`
 	DeviceIndex int    `json:"device_index"`
 	SensorName  string `json:"sensor_name"`
+	Allow       bool   `json:"allow"` // NOT NULL DEFAULT true on the API's side — see apiDevice.Allow
+
 	// AssetID is an override, independent of the sensor's device's own
 	// asset_id — set only for a sensor on a bus-listening device (e.g. a
 	// UC300) that's physically relaying readings for a different asset than
@@ -349,6 +351,10 @@ func GetSensorsMap(apiBaseURL string) (map[string]SensorConfig, error) {
 	seenTuple := make(map[string]string, len(rows)) // (device_id,sensor_type,device_index) -> sensor_id
 
 	for _, s := range rows {
+		if !s.Allow {
+			continue
+		}
+
 		if err := validateAPISensor(s, validTypes); err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}

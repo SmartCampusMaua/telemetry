@@ -8,6 +8,13 @@
       "when": 1789520498939,
       "tag": "0000_dear_network",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793238684055,
+      "tag": "0001_clever_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

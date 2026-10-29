@@ -60,12 +60,25 @@ export const devices = pgTable("devices", {
 // set explicitly for the exception case — a specific channel on a bus-listening device actually
 // belongs to a different physical asset than the device's own home. Effective asset for any
 // sensor is `sensor.asset_id ?? device.asset_id`, computed wherever the registry is read.
+//
+// device_id cascades on delete — deleting a device is deliberately allowed to take its sensors
+// with it (confirmed acceptable: these are config rows, not historical data; InfluxDB3 itself is
+// untouched either way). asset_id does NOT cascade — deleting an asset must never silently delete
+// real registered hardware, so that FK stays RESTRICT (see the registry.ts DELETE handler's
+// friendly error for that case).
+//
+// allow mirrors devices.allow exactly — services/input/mqtt's GetSensorsMap skips !allow rows the
+// same way GetDevicesMap already skips !allow devices, so toggling this actually removes the
+// sensor from decode-time resolution, not just a UI-only flag.
 export const sensors = pgTable("sensors", {
   id: uuid("id").primaryKey(),
   sensor_type: text("sensor_type").notNull(),
-  device_id: uuid("device_id").notNull().references(() => devices.id),
+  device_id: uuid("device_id")
+    .notNull()
+    .references(() => devices.id, { onDelete: "cascade" }),
   device_index: integer("device_index"),
   sensor_name: text("sensor_name"),
+  allow: boolean("allow").notNull().default(true),
   asset_id: uuid("asset_id").references(() => assets.id),
   ...timestamps,
 });
@@ -78,7 +91,9 @@ export const sensors = pgTable("sensors", {
 // definitions in a separate repo.
 export const deviceBuses = pgTable("device_buses", {
   id: uuid("id").primaryKey().defaultRandom(),
-  device_id: uuid("device_id").notNull().references(() => devices.id),
+  device_id: uuid("device_id")
+    .notNull()
+    .references(() => devices.id, { onDelete: "cascade" }),
   bus_type: text("bus_type").notNull(), // "modbus_rs485" | "modbus_rs232" | ...
   label: text("label"),
   ...timestamps,
@@ -90,8 +105,13 @@ export const modbusChannels = pgTable(
   "modbus_channels",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    device_bus_id: uuid("device_bus_id").notNull().references(() => deviceBuses.id),
-    sensor_id: uuid("sensor_id").notNull().unique().references(() => sensors.id),
+    device_bus_id: uuid("device_bus_id")
+      .notNull()
+      .references(() => deviceBuses.id, { onDelete: "cascade" }),
+    sensor_id: uuid("sensor_id")
+      .notNull()
+      .unique()
+      .references(() => sensors.id, { onDelete: "cascade" }),
     modbus_channel: integer("modbus_channel").notNull(),
     modbus_slave_id: integer("modbus_slave_id").notNull(),
     ...timestamps,
